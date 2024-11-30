@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Portfolio</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>AI Portfolio</h1>
+  </header>
+  <nav>
+    <a href="#textual-ai">Textual AI Experiments</a>
+    <a href="#visual-ai">Visual AI Experiments</a>
+    <a href="#procedural-ai">Procedural AI Experiments</a>
+  </nav>
+  <main>
+    <section id="textual-ai">
+        <h2>Textual AI Experiments</h2>
+        <p>Explore experiments in AI-driven text generation and storytelling.</p>
+      
+        <!-- Cards for Textual AI Projects -->
+        <div class="card-container">
+          <!-- Card 1: Distant Read -->
+          <div class="card">
+            <h3>Distant Read</h3>
+            <p>Analyze patterns and insights across a large corpus of texts using AI-powered tools.</p>
+            <button onclick="viewProject('distant-read')">View Project</button>
+          </div>
+      
+          <!-- Card 2: Generative Short Story -->
+          <div class="card">
+            <h3>Generative Short Story</h3>
+            <p>Read a short story entirely written by an AI, exploring themes of imagination and creativity.</p>
+            <button onclick="viewProject('short-story')">View Project</button>
+          </div>
+      
+          <!-- Card 3: Conversation with a Bot -->
+          <div class="card">
+            <h3>Conversation with a Bot</h3>
+            <p>Engage in a human-like conversation with an advanced chatbot trained for meaningful interactions.</p>
+            <button onclick="viewProject('conversation')">View Project</button>
+          </div>
+        </div>
+      </section>      
+
+    <section id="visual-ai">
+        <h2>Visual AI Experiments</h2>
+        <p>Discover AI-generated art and visual experiments.</p>
+      
+        <!-- Image Carousel -->
+        <div class="carousel">
+          <div class="carousel-item active">
+            <img src="tablet.jpg" alt="Ancient Mesopotamian Clay Tablet">
+            <div class="carousel-caption">Ancient Mesopotamian Clay Tablet</div>
+          </div>
+          <div class="carousel-item">
+            <img src="AI.jpg" alt="AI Portfolio Header Image">
+            <div class="carousel-caption">AI Portfolio Header Image</div>
+          </div>
+          <div class="carousel-item">
+            <img src="family_tree.jpg" alt="Textile Family Tree">
+            <div class="carousel-caption">Textile Family Tree</div>
+          </div>
+          <div class="carousel-item">
+            <img src="Meme.jpg" alt="AI-Generated Meme">
+            <div class="carousel-caption">AI-Generated Meme</div>
+          </div>
+          <div class="carousel-item">
+            <img src="travel_journal.jpg" alt="Intricate Travel Journal Page">
+            <div class="carousel-caption">Intricate Travel Journal Page</div>
+          </div>
+        </div>
+      
+        <!-- Carousel Navigation -->
+        <div class="carousel-controls">
+          <button class="carousel-control prev" onclick="prevSlide()">&#10094; Previous</button>
+          <button class="carousel-control next" onclick="nextSlide()">Next &#10095;</button>
+        </div>
+      </section>      
+
+      <section id="procedural-ai">
+        <h2>Procedural AI Experiments</h2>
+        <p>Discover projects where AI creates systems and experiences dynamically.</p>
+      
+        <!-- Cards for Procedural AI Projects -->
+        <div class="card-container">
+          <!-- Card 1: Switch Game Recommendation System -->
+          <div class="card">
+            <h3>Switch Game Recommendation</h3>
+            <p>Get personalized game recommendations for your Nintendo Switch based on your preferences.</p>
+            <a href="recommendations/index.html" class="card-button">Explore Now</a>
+          </div>
+      
+          <!-- Card 2: AI-Driven Game -->
+          <div class="card">
+            <h3>AI-Driven Game</h3>
+            <p>Play a procedurally generated game that adapts and changes based on your actions.</p>
+            <a href="game/index.html" class="card-button">Play Now</a>
+          </div>
+        </div>
+      </section>
+      
+  </main>
+  <footer>
+    <p>&copy; 2024 AI Portfolio | Contact: <a href="mailto:example@example.com">example@example.com</a></p>
+  </footer>
+
+  <script src="scripts.js"></script>
+</body>
+</html>

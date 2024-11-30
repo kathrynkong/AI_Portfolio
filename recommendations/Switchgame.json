@@ -1,0 +1,603 @@
+[
+    {
+      "title": "The Legend of Zelda: Breath of the Wild",
+      "developer": "Nintendo (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2017,
+      "genre": "Action-adventure",
+      "players": "Single-player",
+      "esrb_rating": "E10+",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Animal Crossing: New Horizons",
+      "developer": "Nintendo (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2020,
+      "genre": "Simulation",
+      "players": "Multiplayer",
+      "esrb_rating": "E",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Super Mario Odyssey",
+      "developer": "Nintendo (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2017,
+      "genre": "Platformer",
+      "players": "Single-player",
+      "esrb_rating": "E10+",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Super Smash Bros. Ultimate",
+      "developer": "Nintendo (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2018,
+      "genre": "Fighting",
+      "players": "Multiplayer",
+      "esrb_rating": "E10+",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Mario Kart 8 Deluxe",
+      "developer": "Nintendo (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2017,
+      "genre": "Racing",
+      "players": "Multiplayer",
+      "esrb_rating": "E",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Bayonetta 3",
+      "developer": "PlatinumGames (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2022,
+      "genre": "Action",
+      "players": "Single-player",
+      "esrb_rating": "M",
+      "supported_languages": ["English", "Japanese"]
+    },
+    {
+      "title": "Fire Emblem: Three Houses",
+      "developer": "Intelligent Systems (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2019,
+      "genre": "Tactical RPG",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Kirby and the Forgotten Land",
+      "developer": "HAL Laboratory (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2022,
+      "genre": "Platformer",
+      "players": "Single-player, Multiplayer",
+      "esrb_rating": "E10+",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Splatoon 3",
+      "developer": "Nintendo (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2022,
+      "genre": "Shooter",
+      "players": "Multiplayer",
+      "esrb_rating": "E10+",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Metroid Dread",
+      "developer": "MercurySteam (Spain)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2021,
+      "genre": "Action-adventure",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "The Legend of Zelda: Tears of the Kingdom",
+      "developer": "Nintendo (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2023,
+      "genre": "Action-adventure",
+      "players": "Single-player",
+      "esrb_rating": "E10+",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Super Mario Bros. Wonder",
+      "developer": "Nintendo (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2023,
+      "genre": "Platformer",
+      "players": "Multiplayer",
+      "esrb_rating": "E",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Tokyo Mirage Sessions #FE Encore",
+      "developer": "Atlus (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2020,
+      "genre": "RPG",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese"]
+    },
+    {
+      "title": "Spiritfarer",
+      "developer": "Thunder Lotus Games (Canada)",
+      "publisher": "Thunder Lotus Games (Canada)",
+      "year": 2020,
+      "genre": "Adventure",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "French", "German", "Spanish", "Portuguese"]
+    },
+    {
+      "title": "Super Mario 3D All-Stars",
+      "developer": "Nintendo (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2020,
+      "genre": "Platformer",
+      "players": "Single-player",
+      "esrb_rating": "E",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "The Last Campfire",
+      "developer": "Hello Games (UK)",
+      "publisher": "Hello Games (UK)",
+      "year": 2020,
+      "genre": "Puzzle adventure",
+      "players": "Single-player",
+      "esrb_rating": "E",
+      "supported_languages": ["English", "French", "German", "Spanish", "Japanese"]
+    },
+    {
+      "title": "SeaBed",
+      "developer": "Fruitbat Factory (Japan)",
+      "publisher": "Fruitbat Factory (Japan)",
+      "year": 2020,
+      "genre": "Visual novel",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese"]
+    },
+    {
+      "title": "Under Night In-Birth Exe",
+      "developer": "French Bread (Japan)",
+      "publisher": "Arc System Works (Japan)",
+      "year": 2020,
+      "genre": "Fighting",
+      "players": "Multiplayer",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese", "French"]
+    },
+    {
+      "title": "BioShock: The Collection",
+      "developer": "Blind Squirrel Games (USA)",
+      "publisher": "2K Games (USA)",
+      "year": 2020,
+      "genre": "Shooter",
+      "players": "Single-player",
+      "esrb_rating": "M",
+      "supported_languages": ["English", "French", "German", "Spanish", "Italian"]
+    },
+    {
+      "title": "Huntdown",
+      "developer": "Easy Trigger Games (Sweden)",
+      "publisher": "Coffee Stain Publishing (Sweden)",
+      "year": 2020,
+      "genre": "Run-and-gun",
+      "players": "Single-player, Multiplayer",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "French", "German", "Spanish", "Japanese"]
+    },
+    {
+      "title": "Hollow Knight",
+      "developer": "Team Cherry (Australia)",
+      "publisher": "Team Cherry (Australia)",
+      "year": 2018,
+      "genre": "Metroidvania",
+      "players": "Single-player",
+      "esrb_rating": "E10+",
+      "supported_languages": ["English", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Unicorn Overlord",
+      "developer": "Atlus (Japan)",
+      "publisher": "Atlus (Japan)",
+      "year": 2023,
+      "genre": "Tactical RPG",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese"]
+    },
+    {
+      "title": "9th Dawn III",
+      "developer": "Valorware (UK)",
+      "publisher": "Valorware (UK)",
+      "year": 2020,
+      "genre": "Action RPG",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English"]
+    },
+    {
+      "title": "Pentiment",
+      "developer": "Obsidian Entertainment (USA)",
+      "publisher": "Xbox Game Studios (USA)",
+      "year": 2022,
+      "genre": "Puzzle adventure",
+      "players": "Single-player",
+      "esrb_rating": "M",
+      "supported_languages": ["English"]
+    },
+    {
+      "title": "Portal: Companion Collection",
+      "developer": "Valve (USA)",
+      "publisher": "Valve (USA)",
+      "year": 2022,
+      "genre": "Puzzle-platformer",
+      "players": "Single-player, Multiplayer",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Chained Echoes",
+      "developer": "Matthias Linda (Germany)",
+      "publisher": "Deck13 (Germany)",
+      "year": 2022,
+      "genre": "RPG",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "German"]
+    },
+    {
+      "title": "Stardew Valley",
+      "developer": "ConcernedApe (USA)",
+      "publisher": "ConcernedApe (USA)",
+      "year": 2016,
+      "genre": "Simulation/RPG",
+      "players": "Single-player, Multiplayer",
+      "esrb_rating": "E10+",
+      "supported_languages": ["English", "French", "German", "Spanish", "Portuguese", "Japanese", "Korean", "Italian"]
+    },
+    {
+      "title": "Balatro",
+      "developer": "Balatro Games (USA)",
+      "publisher": "Balatro Games (USA)",
+      "year": 2024,
+      "genre": "Roguelike",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English"]
+    },
+    {
+      "title": "Super Smash Bros. Ultimate",
+      "developer": "Bandai Namco Studios/Sora Ltd. (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2018,
+      "genre": "Fighting",
+      "players": "Multiplayer",
+      "esrb_rating": "E10+",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Death's Door",
+      "developer": "Acid Nerve (UK)",
+      "publisher": "Devolver Digital (USA)",
+      "year": 2021,
+      "genre": "Action-adventure",
+      "players": "Single-player",
+      "esrb_rating": "E10+",
+      "supported_languages": ["English", "French", "German", "Spanish", "Japanese"]
+    },
+    {
+      "title": "Bayonetta 2",
+      "developer": "PlatinumGames (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2018,
+      "genre": "Action-adventure",
+      "players": "Single-player",
+      "esrb_rating": "M",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "The House in Fata Morgana",
+      "developer": "Novectacle (Japan)",
+      "publisher": "Limited Run Games (USA)",
+      "year": 2021,
+      "genre": "Visual novel",
+      "players": "Single-player",
+      "esrb_rating": "M",
+      "supported_languages": ["English", "Japanese"]
+    },
+    {
+      "title": "Dragon Quest XI S: Echoes of an Elusive Age – Definitive Edition",
+      "developer": "Square Enix (Japan)",
+      "publisher": "Square Enix (Japan)",
+      "year": 2019,
+      "genre": "RPG",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Kirby and the Forgotten Land",
+      "developer": "HAL Laboratory (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2022,
+      "genre": "Platformer",
+      "players": "Single-player, Multiplayer",
+      "esrb_rating": "E10+",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "The Great Ace Attorney Chronicles",
+      "developer": "Capcom (Japan)",
+      "publisher": "Capcom (Japan)",
+      "year": 2021,
+      "genre": "Visual novel/Adventure",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese"]
+    },
+    {
+      "title": "Castlevania Dominus Collection",
+      "developer": "Konami (Japan)",
+      "publisher": "Konami (Japan)",
+      "year": 2022,
+      "genre": "Platformer",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese"]
+    },
+    {
+      "title": "SteamWorld Dig 2",
+      "developer": "Image & Form (Sweden)",
+      "publisher": "Thunderful Publishing (Sweden)",
+      "year": 2017,
+      "genre": "Metroidvania",
+      "players": "Single-player",
+      "esrb_rating": "E10+",
+      "supported_languages": ["English", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Mary Skelter Finale",
+      "developer": "Compile Heart (Japan)",
+      "publisher": "Idea Factory (Japan)",
+      "year": 2021,
+      "genre": "Dungeon Crawler",
+      "players": "Single-player",
+      "esrb_rating": "M",
+      "supported_languages": ["English", "Japanese"]
+    },
+    {
+      "title": "NieR The End of YoRHa Edition",
+      "developer": "PlatinumGames (Japan)",
+      "publisher": "Square Enix (Japan)",
+      "year": 2022,
+      "genre": "Action RPG",
+      "players": "Single-player",
+      "esrb_rating": "M",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Spelunky 2",
+      "developer": "Mossmouth (USA)",
+      "publisher": "BlitWorks (Spain)",
+      "year": 2020,
+      "genre": "Roguelike",
+      "players": "Single-player, Multiplayer",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Pocket Card Jockey: Ride On!",
+      "developer": "Game Freak (Japan)",
+      "publisher": "Game Freak (Japan)",
+      "year": 2022,
+      "genre": "Card game",
+      "players": "Single-player",
+      "esrb_rating": "E",
+      "supported_languages": ["English", "Japanese"]
+    },
+    {
+      "title": "Undernauts: Labyrinth of Yomi",
+      "developer": "Experience Inc. (Japan)",
+      "publisher": "Aksys Games (USA)",
+      "year": 2021,
+      "genre": "Dungeon Crawler",
+      "players": "Single-player",
+      "esrb_rating": "M",
+      "supported_languages": ["English", "Japanese"]
+    },
+    {
+      "title": "Animal Crossing: New Horizons",
+      "developer": "Nintendo (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2020,
+      "genre": "Simulation",
+      "players": "Single-player, Multiplayer",
+      "esrb_rating": "E",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish", "Korean", "Chinese"]
+    },
+    {
+      "title": "Sonic Mania Plus",
+      "developer": "SEGA (Japan)",
+      "publisher": "SEGA (Japan)",
+      "year": 2018,
+      "genre": "Platformer",
+      "players": "Single-player, Multiplayer",
+      "esrb_rating": "E",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Fire Emblem: Three Houses",
+      "developer": "Intelligent Systems (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2019,
+      "genre": "Tactical RPG",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Alien: Isolation",
+      "developer": "Creative Assembly (UK)",
+      "publisher": "SEGA (Japan)",
+      "year": 2019,
+      "genre": "Survival Horror",
+      "players": "Single-player",
+      "esrb_rating": "M",
+      "supported_languages": ["English", "French", "German", "Spanish", "Italian"]
+    },
+    {
+      "title": "The Forgotten City - Cloud Version",
+      "developer": "Modern Storyteller (Australia)",
+      "publisher": "Dear Villagers (France)",
+      "year": 2021,
+      "genre": "Adventure",
+      "players": "Single-player",
+      "esrb_rating": "M",
+      "supported_languages": ["English", "French", "German", "Spanish", "Italian", "Japanese", "Russian"]
+    },
+    {
+      "title": "Anonymous;Code",
+      "developer": "MAGES Inc. (Japan)",
+      "publisher": "Spike Chunsoft (Japan)",
+      "year": 2022,
+      "genre": "Visual Novel",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese"]
+    },
+    {
+      "title": "Spirit Hunter: Death Mark II",
+      "developer": "Experience Inc. (Japan)",
+      "publisher": "Aksys Games (USA)",
+      "year": 2022,
+      "genre": "Visual Novel",
+      "players": "Single-player",
+      "esrb_rating": "M",
+      "supported_languages": ["English", "Japanese"]
+    },
+    {
+      "title": "Thronefall",
+      "developer": "GrizzlyGames (Germany)",
+      "publisher": "GrizzlyGames (Germany)",
+      "year": 2023,
+      "genre": "Strategy",
+      "players": "Single-player",
+      "esrb_rating": "E",
+      "supported_languages": ["English", "German"]
+    },
+    {
+      "title": "Apollo Justice: Ace Attorney Trilogy",
+      "developer": "Capcom (Japan)",
+      "publisher": "Capcom (Japan)",
+      "year": 2024,
+      "genre": "Visual Novel/Adventure",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Marvel vs. Capcom Fighting Collection",
+      "developer": "Capcom (Japan)",
+      "publisher": "Capcom (Japan)",
+      "year": 2022,
+      "genre": "Fighting",
+      "players": "Multiplayer",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Kentucky Route Zero: TV Edition",
+      "developer": "Cardboard Computer (USA)",
+      "publisher": "Annapurna Interactive (USA)",
+      "year": 2020,
+      "genre": "Adventure",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "French", "German", "Spanish", "Italian"]
+    },
+    {
+      "title": "Streets of Rage 4",
+      "developer": "Dotemu (France)",
+      "publisher": "Dotemu (France)",
+      "year": 2020,
+      "genre": "Fighting",
+      "players": "Single-player, Multiplayer",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "French", "German", "Spanish", "Italian"]
+    },
+    {
+      "title": "Ghost Trick: Phantom Detective",
+      "developer": "Capcom (Japan)",
+      "publisher": "Capcom (Japan)",
+      "year": 2023,
+      "genre": "Puzzle Adventure",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Bug Fables: The Everlasting Sapling",
+      "developer": "Moonsprout Games (Canada)",
+      "publisher": "Dangen Entertainment (Japan)",
+      "year": 2019,
+      "genre": "RPG",
+      "players": "Single-player",
+      "esrb_rating": "E",
+      "supported_languages": ["English", "Japanese"]
+    },
+    {
+      "title": "Astral Chain",
+      "developer": "PlatinumGames (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2019,
+      "genre": "Action-adventure",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Hyper Light Drifter",
+      "developer": "Heart Machine (USA)",
+      "publisher": "Abylight Studios (Spain)",
+      "year": 2019,
+      "genre": "Action-adventure",
+      "players": "Single-player",
+      "esrb_rating": "T",
+      "supported_languages": ["English", "French", "German", "Spanish", "Japanese", "Chinese"]
+    },
+    {
+      "title": "The Oregon Trail",
+      "developer": "Gameloft (USA)",
+      "publisher": "Gameloft (USA)",
+      "year": 2022,
+      "genre": "Adventure/Simulation",
+      "players": "Single-player",
+      "esrb_rating": "E",
+      "supported_languages": ["English", "French", "German", "Spanish"]
+    },
+    {
+      "title": "Paper Mario: The Thousand Year Door",
+      "developer": "Intelligent Systems (Japan)",
+      "publisher": "Nintendo (Japan)",
+      "year": 2024,
+      "genre": "RPG",
+      "players": "Single-player",
+      "esrb_rating": "E",
+      "supported_languages": ["English", "Japanese", "French", "German", "Spanish"]
+    }
+  ]
+            

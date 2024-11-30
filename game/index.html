@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple P5.js Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+    <script>
+        let catImage;
+        let catZones = [];
+        let doorZones = [];
+        let message = "";
+        let messageTimer = 0;
+        let choices = [];
+        let points = 0;
+        let glowingBall;
+        let showGlowingBall = false;
+        let gameEnded = false;
+
+        function preload() {
+            catImage = loadImage('cat.png');
+        }
+
+        function setup() {
+            let canvas = createCanvas(1000, 1000);
+            canvas.parent(document.body);
+            canvas.style('display', 'block'); // To ensure the canvas is centered
+
+            // Define interaction zones for cats (x, y, width, height)
+            catZones.push({ x: 88.5, y: 793, w: 148, h: 169, name: 'Left Cat' }); // Left cat
+            catZones.push({ x: 400.5, y: 693, w: 283, h: 269, name: 'Middle Cat' }); // Middle cat
+            catZones.push({ x: 712.5, y: 789, w: 236, h: 191, name: 'Right Cat' }); // Right cat
+
+            // Define interaction zones for doors (x, y, width, height)
+            doorZones.push({ x: 100.5, y: 329, w: 224, h: 445, name: 'Left Door' }); // Left door
+            doorZones.push({ x: 403.5, y: 335, w: 208, h: 440, name: 'Middle Door' }); // Middle door
+            doorZones.push({ x: 697.5, y: 336, w: 197, h: 442, name: 'Right Door' }); // Right door
+        }
+
+        function draw() {
+            if (gameEnded) {
+                // Blur the background
+                drawingContext.filter = 'blur(5px)';
+            } else {
+                drawingContext.filter = 'none';
+            }
+
+            // Clear background and draw main canvas elements
+            background(catImage);
+
+            // Reset drawing properties to avoid unwanted transformations
+            rectMode(CORNER);
+            textAlign(LEFT, TOP);
+            textSize(24);
+            fill(255, 100, 150);
+            noStroke();
+
+            let catZoneHighlighted = false;
+
+            // Highlight interaction zones on mouseover and display zone names
+            for (let zone of catZones) {
+                if (isMouseOverZone(zone)) {
+                    fill(255, 200, 200, 150);
+                    rect(zone.x, zone.y, zone.w, zone.h);
+                    displayZoneName(zone.name);
+                    catZoneHighlighted = true;
+                }
+            }
+
+            // Only display door zones if no cat zone is highlighted
+            if (!catZoneHighlighted) {
+                for (let zone of doorZones) {
+                    if (isMouseOverZone(zone)) {
+                        fill(200, 255, 200, 150);
+                        rect(zone.x, zone.y, zone.w, zone.h);
+                        displayZoneName(zone.name);
+                    }
+                }
+            }
+
+            // Display mouse coordinates
+            displayCoordinates();
+
+            // Display message if present
+            if (messageTimer > 0) {
+                displayMessage(message);
+                messageTimer--;
+            }
+
+            // Display choices if present
+            if (choices.length > 0) {
+                displayChoices();
+            }
+
+            // Display glowing ball if active
+            if (showGlowingBall) {
+                fill(255, 255, 0);
+                ellipse(glowingBall.x, glowingBall.y, 50);
+            }
+
+            // Display points
+            fill(0);
+            textAlign(LEFT, TOP);
+            text(`Points: ${points}`, 10, 10);
+
+            // Check if game has ended
+            if (points >= 15 && !gameEnded) {
+                endGame();
+            }
+
+            // Display end screen if game has ended
+            if (gameEnded) {
+                drawingContext.filter = 'none'; // Remove blur for the text
+                displayEndScreen();
+            }
+        }
+
+        function isMouseOverZone(zone) {
+            return mouseX > zone.x && mouseX < zone.x + zone.w && mouseY > zone.y && mouseY < zone.y + zone.h;
+        }
+
+        function mousePressed() {
+            if (gameEnded) return; // Stop interactions if game has ended
+
+            // Handle mouse interactions
+            let choiceHandled = false;
+
+            // Handle clicking on choices
+            for (let i = 0; i < choices.length; i++) {
+                let choiceY = height / 2 + 100 + i * 40;
+                if (mouseX > width / 2 - 200 && mouseX < width / 2 + 200 && mouseY > choiceY - 20 && mouseY < choiceY + 20) {
+                    handleChoice(choices[i]);
+                    choiceHandled = true;
+                    return;
+                }
+            }
+
+            // If choice is handled, do not process further clicks
+            if (choiceHandled) return;
+
+            // Handle mouse click interactions with cat zones
+            for (let i = 0; i < catZones.length; i++) {
+                if (isMouseOverZone(catZones[i])) {
+                    switch (i) {
+                        case 0:
+                            message = "Bring me the shimmer of the cosmos, and I shall grant you the Sky Palace's secret.";
+                            choices = []; // Clear choices if any
+                            break;
+                        case 1:
+                            message = "Chase the ball, and the Enchanted Forest will open its heart to you.";
+                            choices = [
+                                "Play with the Ball",
+                                "Ask About the Forest",
+                                "Pet the Cat"
+                            ];
+                            break;
+                        case 2:
+                            message = "The stars whisper their secrets to me. Prove you understand their song, and the Starry Abyss shall be yours.";
+                            choices = []; // Clear choices if any
+                            break;
+                    }
+                    messageTimer = 180; // Display message for 3 seconds
+                }
+            }
+
+            // Handle mouse click interactions with door zones
+            for (let i = 0; i < doorZones.length; i++) {
+                if (isMouseOverZone(doorZones[i])) {
+                    switch (i) {
+                        case 0:
+                            message = "Only those who catch the falling stars may enter the Sky Palace. Dare to chase the light of the heavens?";
+                            break;
+                        case 1:
+                            message = "Follow the glow into the Enchanted Forest. Only those with the courage to uncover the truth may pass.";
+                            break;
+                        case 2:
+                            message = "Answer the riddle to unlock the Starry Abyss. What shines in the darkness but can never be held?";
+                            break;
+                    }
+                    messageTimer = 180; // Display message for 3 seconds
+                    choices = []; // Clear choices for doors
+                }
+            }
+
+            // Handle clicking on glowing ball
+            if (showGlowingBall && dist(mouseX, mouseY, glowingBall.x, glowingBall.y) < 25) {
+                points += 10;
+                showGlowingBall = false;
+            }
+        }
+
+        function handleChoice(choice) {
+            switch (choice) {
+                case "Play with the Ball":
+                    message = "Ginger bats a glowing ball toward you, her eyes sparkling with excitement.";
+                    glowingBall = { x: width / 2, y: 100 };
+                    showGlowingBall = true;
+                    break;
+                case "Ask About the Forest":
+                    message = "The Enchanted Forest is full of secrets. Bring me a golden leaf, and I might tell you more.";
+                    break;
+                case "Pet the Cat":
+                    message = "The cat purrs loudly, leaning into your touch. \"Hmm, you know how to treat royalty! Maybe I’ll help you on your journey.\"";
+                    points += 5;
+                    break;
+            }
+            messageTimer = 180;
+            choices = []; // Clear choices after handling one
+        }
+
+        function displayCoordinates() {
+            fill(255);
+            textSize(24);
+            textAlign(LEFT, TOP);
+            text(`x: ${mouseX}, y: ${mouseY}`, mouseX + 10, mouseY + 10);
+        }
+
+        function displayZoneName(name) {
+            fill(0);
+            textSize(48);
+            textAlign(CENTER, CENTER);
+            text(name, width / 2, height / 2);
+        }
+
+        function displayMessage(msg) {
+            let boxPadding = 20;
+            let boxWidth = 700;
+            let textX = width / 2;
+            let textY = height / 2;
+
+            fill(255, 255, 0);
+            textSize(32);
+            textAlign(CENTER, CENTER);
+            textStyle(BOLD);
+            textWrap(WORD);
+            text(msg, textX - boxWidth / 2 + boxPadding, textY, boxWidth - boxPadding * 2);
+        }
+
+        function displayChoices() {
+            for (let i = 0; i < choices.length; i++) {
+                let choiceY = height / 2 + 100 + i * 40;
+                rectMode(CENTER);
+                fill(200);
+                rect(width / 2, choiceY, 400, 30);
+                fill(0);
+                textSize(20);
+                textAlign(CENTER, CENTER);
+                text(choices[i], width / 2, choiceY);
+            }
+            // Reset rectMode to CORNER for other drawings
+            rectMode(CORNER);
+        }
+
+        function endGame() {
+            gameEnded = true;
+        }
+
+        function displayEndScreen() {
+            fill(0, 0, 0, 150);
+            rect(0, 0, width, height);
+
+            fill(255);
+            textSize(48);
+            textAlign(CENTER, CENTER);
+            text("Congratulations! You won!", width / 2, height / 2);
+        }
+    </script>
+</body>
+</html>
