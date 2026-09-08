@@ -72,6 +72,7 @@
 
     <script>
         const genrePreferences = {};
+        const gameRatingState = {};
         let allGames = [];
         let ratedGames = [];
 
@@ -91,8 +92,9 @@
 
         function displayGames(games) {
             const gamesContainer = document.getElementById('games');
-            games.forEach(game => {
+            games.forEach((game, index) => {
                 ratedGames.push(game.title);
+                const gameId = `game-${index}`;
                 const gameDiv = document.createElement('div');
                 gameDiv.classList.add('game-container');
 
@@ -107,27 +109,53 @@
                     <div>Supported Languages: ${game.supported_languages.join(', ')}</div>
                     <div class="rating">
                         <label>Rate this game:</label><br>
-                        <label><input type="radio" name="rating-${game.title}" value="1" onchange="handleRating('${game.genre}', 1)"> 1</label>
-                        <label><input type="radio" name="rating-${game.title}" value="2" onchange="handleRating('${game.genre}', 2)"> 2</label>
-                        <label><input type="radio" name="rating-${game.title}" value="3" onchange="handleRating('${game.genre}', 3)"> 3</label>
-                        <label><input type="radio" name="rating-${game.title}" value="4" onchange="handleRating('${game.genre}', 4)"> 4</label>
-                        <label><input type="radio" name="rating-${game.title}" value="5" onchange="handleRating('${game.genre}', 5)"> 5</label>
-                        <label><input type="radio" name="rating-${game.title}" value="haven't played" onchange="handleRating('${game.genre}', 'haven't played')"> Haven't played it</label>
                     </div>
                 `;
+
+                const ratingDiv = gameDiv.querySelector('.rating');
+                const options = [
+                    { value: '1', text: '1' },
+                    { value: '2', text: '2' },
+                    { value: '3', text: '3' },
+                    { value: '4', text: '4' },
+                    { value: '5', text: '5' },
+                    { value: "haven't played", text: "Haven't played it" }
+                ];
+
+                options.forEach(option => {
+                    const label = document.createElement('label');
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = `rating-${gameId}`;
+                    input.value = option.value;
+                    input.addEventListener('change', () => handleRating(gameId, game.genre, option.value));
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(' ' + option.text));
+                    ratingDiv.appendChild(label);
+                    ratingDiv.appendChild(document.createElement('br'));
+                });
 
                 gamesContainer.appendChild(gameDiv);
             });
         }
 
-        function handleRating(genre, rating) {
-            if (rating >= 3) {
-                if (genrePreferences[genre]) {
-                    genrePreferences[genre] += 1;
-                } else {
-                    genrePreferences[genre] = 1;
+        function handleRating(gameId, genre, rating) {
+            const numericRating = Number(rating);
+            const countsTowardPreference = !Number.isNaN(numericRating) && numericRating >= 3;
+
+            const previous = gameRatingState[gameId];
+            if (previous && previous.counted) {
+                genrePreferences[previous.genre] -= 1;
+                if (genrePreferences[previous.genre] <= 0) {
+                    delete genrePreferences[previous.genre];
                 }
             }
+
+            if (countsTowardPreference) {
+                genrePreferences[genre] = (genrePreferences[genre] || 0) + 1;
+            }
+
+            gameRatingState[gameId] = { genre, counted: countsTowardPreference };
             updatePreferencesDisplay();
         }
 
