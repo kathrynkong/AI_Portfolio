@@ -5,439 +5,557 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cats, Riddles &amp; Procedural Play</title>
     <style>
+        * { box-sizing: border-box; }
+
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at top, #fff6e9 0%, #f6e6cf 100%);
+            font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+            color: #5b4636;
+            padding: 24px;
+        }
+
+        .game-window {
+            width: 100%;
+            max-width: 640px;
+            background: #fffaf2;
+            border: 3px solid #e8c9a0;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(120, 80, 40, 0.15);
+            padding: 20px 24px 28px;
+        }
+
+        .hud {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .hud h1 {
+            font-size: 1.3em;
+            margin: 0;
+            color: #a8622b;
+        }
+
+        .paw-tokens {
+            background: #ffe9c7;
+            border: 2px solid #e8c9a0;
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-weight: bold;
+            font-size: 0.95em;
+            transition: transform 0.2s ease;
+        }
+
+        .paw-tokens.pulse {
+            animation: pulse 0.4s ease;
+        }
+
+        .badge {
+            margin-left: 8px;
+        }
+
+        .cats-row {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .cat-card {
+            flex: 1 1 220px;
+            max-width: 260px;
+            background: #fff3e0;
+            border: 3px solid #e8c9a0;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            font-family: inherit;
+            color: inherit;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .cat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 18px rgba(120, 80, 40, 0.18);
+        }
+
+        .cat-card.active {
+            border-color: #e2823f;
+            background: #ffe9c7;
+        }
+
+        .cat-card.bounce {
+            animation: bounce 0.4s ease;
+        }
+
+        .cat-emoji {
+            font-size: 3em;
+            line-height: 1;
+        }
+
+        .cat-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-top: 6px;
+        }
+
+        .cat-mood {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .mood-Curious { background: #d6ecff; color: #29638a; }
+        .mood-Sleepy { background: #e4e0f5; color: #5c4d8a; }
+        .mood-Grumpy { background: #ffd9d0; color: #a8402a; }
+        .mood-Playful { background: #fff0b3; color: #8a6d1a; }
+
+        .scene-panel {
+            background: #fdf0dc;
+            border: 2px dashed #e0bd8c;
+            border-radius: 14px;
+            padding: 16px;
+            min-height: 140px;
+        }
+
+        .speech-bubble {
+            position: relative;
+            background: #ffffff;
+            border: 2px solid #e8c9a0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 1em;
+            line-height: 1.4;
+            margin-bottom: 14px;
+        }
+
+        .speech-bubble.pop {
+            animation: pop-in 0.25s ease;
+        }
+
+        .speech-bubble.shake {
+            animation: shake 0.4s ease;
+        }
+
+        .choice-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .choice-btn {
+            background: #e2823f;
+            color: white;
+            border: none;
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-size: 0.95em;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s ease, transform 0.15s ease;
+        }
+
+        .choice-btn:hover {
+            background: #c96a2c;
+            transform: translateY(-2px);
+        }
+
+        .riddle-card {
+            flex: 1 1 150px;
+            background: #ffffff;
+            border: 2px solid #e8c9a0;
+            border-radius: 12px;
+            padding: 14px 10px;
+            font-weight: bold;
+            font-size: 1em;
+            cursor: pointer;
+            font-family: inherit;
+            color: #5b4636;
+            transition: transform 0.15s ease, border-color 0.2s ease;
+        }
+
+        .riddle-card:hover {
+            transform: translateY(-3px);
+            border-color: #e2823f;
+        }
+
+        .riddle-card.correct {
+            animation: sparkle 0.5s ease;
+            border-color: #4caf50;
+            background: #eaf7ea;
+        }
+
+        .riddle-card.wrong {
+            animation: shake 0.4s ease;
+            border-color: #d9695a;
+            background: #fbe9e7;
+        }
+
+        .replay-row {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .replay-btn {
+            background: #a8622b;
+            color: white;
+            border: none;
+            border-radius: 999px;
+            padding: 10px 20px;
+            font-size: 0.95em;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .replay-btn:hover {
+            background: #8a4f22;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+            60% { transform: translateY(0); }
+            80% { transform: translateY(-4px); }
+            100% { transform: translateY(0); }
+        }
+
+        @keyframes pop-in {
+            0% { transform: scale(0.92); opacity: 0.4; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        @keyframes sparkle {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 480px) {
+            .cats-row { flex-direction: column; align-items: center; }
+            .cat-card { max-width: 100%; }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
 </head>
 <body>
-    <button id="restart-btn" onclick="restartGame()" style="display:none; position:fixed; top:20px; right:20px; z-index:10; padding:10px 18px; font-size:1em; cursor:pointer; background:#ff69b4; color:white; border:none; border-radius:6px;">Play Again</button>
-    <script>
-        let catImage;
-        let catZones = [];
-        let doorZones = [];
-        let message = "";
-        let messageTimer = 0;
-        let choices = [];
-        let points = 0;
-        let glowingBall;
-        let showGlowingBall = false;
-        let ballSource = null; // which reward spawned the current glowing ball ('ball' | 'star')
-        let activeCatIndex = -1; // which cat's dialogue is currently open
-        let claimedRewards = new Set(); // one-time reward keys already collected
-        let gameEnded = false;
-        let activeInteraction = null; // 'riddle' while the right cat's riddle choices are on screen
-        let currentRiddle = null; // riddle picked fresh each time the right cat is approached
+    <div class="game-window">
+        <div class="hud">
+            <h1>🐾 Cat Encounters</h1>
+            <div class="paw-tokens" id="paw-tokens">Paw Tokens: <span id="paw-count">0</span><span class="badge" id="badge"></span></div>
+        </div>
 
-        // --- Procedural text generation -----------------------------------
-        // Dialogue is assembled at runtime from small word banks and a
-        // riddle pool instead of being fixed strings, so replaying the game
-        // (or just re-visiting a cat) produces different phrasing/puzzles.
-        const flavorBanks = {
-            cosmosNouns: ["comet's tail", "morning star", "aurora's edge", "midnight glow", "wandering nebula"],
-            skyAdjectives: ["shimmering", "silver-veined", "frost-lit", "star-flecked", "cloud-wreathed"],
-            forestNouns: ["golden leaf", "moonlit spring", "whispering root", "silver acorn"],
-            forestAdjectives: ["moss-cloaked", "sunlit", "tangled", "fern-shadowed"],
-            purrs: [
-                "The cat purrs loudly, leaning into your touch. \"Hmm, you know how to treat royalty! Maybe I'll help you on your journey.\"",
-                "The cat headbutts your hand and rumbles with a deep, satisfied purr. \"Not bad, for a wingless one.\"",
-                "The cat stretches luxuriously under your hand. \"Careful — I could get used to this.\""
-            ]
+        <div class="cats-row" id="cats-row"></div>
+
+        <div class="scene-panel">
+            <div class="speech-bubble" id="speech-bubble">Click a cat to say hello.</div>
+            <div class="choice-row" id="choice-row"></div>
+        </div>
+
+        <div class="replay-row">
+            <button class="replay-btn" id="replay-btn">🔄 Play Again — it'll go differently next time</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Game data -----------------------------------------------------
+        // Each cat has its own personality, expressed as its own word banks
+        // per action per mood. Procedural output is a function of
+        // (cat personality, action, current mood, random pick) — not just a
+        // single global pool of random sentences.
+        const MOODS = ['Curious', 'Sleepy', 'Grumpy', 'Playful'];
+
+        const cats = {
+            mochi: {
+                key: 'mochi',
+                name: 'Mochi',
+                emoji: '🐈',
+                startMood: 'Curious',
+                mood: 'Curious',
+                actions: ['pet', 'treat', 'talk'],
+                dialogue: {
+                    greet: {
+                        Curious: ["{cat} looks up at you, ears perked with interest."],
+                        Sleepy: ["{cat} blinks slowly at you from a warm patch of sun."],
+                        Grumpy: ["{cat} eyes you suspiciously from across the room."],
+                        Playful: ["{cat} bounds over, tail high, ready for anything."]
+                    },
+                    pet: {
+                        Grumpy: ["{cat} flattens her ears and swats at your hand — not today.", "{cat} backs away with a soft warning growl."],
+                        Sleepy: ["{cat} cracks one eye open, allows a single pat, then dozes right back off.", "{cat} leans into your hand without fully waking up."],
+                        Curious: ["{cat} sniffs your fingers thoroughly before allowing a scratch behind the ears.", "{cat} tilts her head, studying you, then permits a gentle pat."],
+                        Playful: ["{cat} headbutts your hand and rolls over for belly rubs.", "{cat} purrs loudly and bats playfully at your sleeve."]
+                    },
+                    treatSuccess: {
+                        Grumpy: ["{cat} cautiously sniffs the salmon treat, then decides you may be acceptable after all."],
+                        Sleepy: ["{cat} opens one eye, sniffs the treat, and accepts it without much enthusiasm."],
+                        Curious: ["{cat} inspects the treat from every angle before accepting it with quiet approval."],
+                        Playful: ["{cat} pounces on the treat like it's the best thing that's ever happened to her."]
+                    },
+                    treatSteal: ["{cat} snatches the treat and bolts under the couch, pretending you were never here.", "{cat} grabs the treat and retreats to a corner, eyeing you the whole time."],
+                    talk: {
+                        Grumpy: ["{cat} flicks her tail and looks away — clearly not in a chatting mood."],
+                        Sleepy: ["{cat} answers with a slow blink, too drowsy for real conversation."],
+                        Curious: ["{cat} tilts her head, seemingly considering your question very seriously."],
+                        Playful: ["{cat} bats at your hand mid-sentence, more interested in play than talk."]
+                    }
+                }
+            },
+            paws: {
+                key: 'paws',
+                name: 'Professor Paws',
+                emoji: '🐈‍⬛',
+                startMood: 'Sleepy',
+                mood: 'Sleepy',
+                actions: ['pet', 'talk', 'riddle'],
+                dialogue: {
+                    greet: {
+                        Curious: ["{cat} regards you over the rim of an invisible pair of spectacles."],
+                        Sleepy: ["{cat} is curled up mid-nap and only half acknowledges you."],
+                        Grumpy: ["{cat} sighs, as if your presence interrupts something important."],
+                        Playful: ["{cat} sets aside his dignity for a moment, tail twitching with interest."]
+                    },
+                    pet: {
+                        Grumpy: ["{cat} narrows his eyes and steps just out of reach.", "{cat} issues a single, unimpressed hiss."],
+                        Sleepy: ["{cat} barely stirs, tolerating the pat with visible effort.", "{cat} allows one pat before returning to his nap."],
+                        Curious: ["{cat} studies your hand like a specimen before allowing contact.", "{cat} permits a scratch, clearly evaluating you as he does."],
+                        Playful: ["{cat} surprises you with an actual purr and a headbutt.", "{cat} swats at your hand — playfully, for once."]
+                    },
+                    talk: {
+                        Grumpy: ["{cat} sighs. \"A question? Really?\" — and says nothing further."],
+                        Sleepy: ["{cat} mumbles something about \"later\" and closes his eyes."],
+                        Curious: ["{cat} considers your question with genuine academic interest."],
+                        Playful: ["{cat} answers your question with a riddle of his own, delighted."]
+                    },
+                    riddleWrong: ["{cat} yawns. \"Try again, seeker.\"", "{cat} shakes his head slowly. \"Not quite.\"", "{cat} looks unimpressed. \"Do better.\""]
+                }
+            }
         };
 
         const riddleBank = [
-            { question: "What shines in the darkness but can never be held?", correct: "A Star", distractors: ["The Moon", "A Flame"] },
-            { question: "What grows brighter the longer you look away from it?", correct: "A Star", distractors: ["A Shadow", "A Candle"] },
-            { question: "What falls from the sky each night, yet nothing ever lands?", correct: "Starlight", distractors: ["Rain", "Snow"] }
+            { question: "What shines in the dark but can never be held?", correct: "A Star", distractors: ["The Moon", "A Flame"] },
+            { question: "What grows brighter the longer you refuse to look at it?", correct: "A Star", distractors: ["A Shadow", "A Candle"] },
+            { question: "What falls every night, yet nothing ever lands?", correct: "Starlight", distractors: ["Rain", "Snow"] },
+            { question: "What has nine lives but only one true nap schedule?", correct: "A Cat", distractors: ["A Ghost", "A Clock"] },
+            { question: "What can you offer freely that is rarely accepted?", correct: "Advice", distractors: ["A Treat", "A Nap"] }
         ];
 
-        const riddleWrongFlavor = [
-            "\"Close,\" the cat purrs, \"but think again, seeker.\"",
-            "The cat tilts its head. \"Not quite what the stars whisper to me.\"",
-            "\"A fair guess,\" the cat says, \"but the Starry Abyss wants better.\""
-        ];
+        const actionLabels = { pet: 'Pet', treat: 'Offer a Treat', talk: 'Ask a Question', riddle: 'Solve a Riddle' };
+
+        // Mood shifts are looked up by action, so the same click can move a
+        // cat toward or away from a friendlier state depending on where it
+        // already is: petting a Grumpy cat keeps it Grumpy (no reward),
+        // while warming it up with a treat first opens the door to a
+        // rewarding pet later.
+        const petMoodNext = { Grumpy: 'Grumpy', Sleepy: 'Sleepy', Curious: 'Playful', Playful: 'Playful' };
+        const treatMoodNext = { Grumpy: 'Curious', Sleepy: 'Curious', Curious: 'Playful', Playful: 'Playful' };
+        const treatStealChance = { Grumpy: 0.4, Sleepy: 0.25, Curious: 0.15, Playful: 0.1 };
+
+        let pawTokens = 0;
+        let riddlesSolved = 0;
+        let activeCatKey = null;
+        let activeRiddle = null;
+
+        const el = {
+            catsRow: document.getElementById('cats-row'),
+            speech: document.getElementById('speech-bubble'),
+            choices: document.getElementById('choice-row'),
+            pawCount: document.getElementById('paw-count'),
+            pawTokens: document.getElementById('paw-tokens'),
+            badge: document.getElementById('badge'),
+            replayBtn: document.getElementById('replay-btn')
+        };
 
         function pick(list) {
-            return list[Math.floor(random(list.length))];
+            return list[Math.floor(Math.random() * list.length)];
         }
 
-        function shuffleArray(list) {
+        function shuffle(list) {
             const result = list.slice();
             for (let i = result.length - 1; i > 0; i--) {
-                const j = Math.floor(random(i + 1));
+                const j = Math.floor(Math.random() * (i + 1));
                 [result[i], result[j]] = [result[j], result[i]];
             }
             return result;
         }
 
-        function generateSkyMessage() {
-            return `Bring me the ${pick(flavorBanks.cosmosNouns)}, and I shall grant you the ${pick(flavorBanks.skyAdjectives)} Sky Palace's secret.`;
+        function line(cat, pool) {
+            return pick(pool).replace(/\{cat\}/g, cat.name);
         }
 
-        function generateForestMessage() {
-            return `Chase the ball, and the ${pick(flavorBanks.forestAdjectives)} Enchanted Forest will open its heart to you.`;
+        function awardTokens(amount) {
+            pawTokens += amount;
+            el.pawCount.textContent = pawTokens;
+            el.pawTokens.classList.remove('pulse');
+            void el.pawTokens.offsetWidth; // restart animation
+            el.pawTokens.classList.add('pulse');
+            if (riddlesSolved >= 3) {
+                el.badge.textContent = ' 🏅 Riddle Sage';
+            }
         }
 
-        function generateForestLore() {
-            return `The Enchanted Forest is full of secrets. Bring me a ${pick(flavorBanks.forestNouns)}, and I might tell you more.`;
+        function say(text, animation) {
+            el.speech.textContent = text;
+            el.speech.classList.remove('pop', 'shake');
+            void el.speech.offsetWidth;
+            el.speech.classList.add(animation || 'pop');
         }
 
-        function generateSkyLore() {
-            return `The Sky Palace floats among the ${pick(flavorBanks.skyAdjectives)} clouds, home to those who dare to reach for the stars.`;
+        function renderCats() {
+            el.catsRow.innerHTML = '';
+            Object.values(cats).forEach(cat => {
+                const card = document.createElement('button');
+                card.type = 'button';
+                card.className = 'cat-card' + (cat.key === activeCatKey ? ' active' : '');
+                card.innerHTML = `
+                    <div class="cat-emoji">${cat.emoji}</div>
+                    <div class="cat-name">${cat.name}</div>
+                    <div class="cat-mood mood-${cat.mood}">${cat.mood}</div>
+                `;
+                card.addEventListener('click', () => selectCat(cat.key, card));
+                el.catsRow.appendChild(card);
+            });
         }
 
-        function pickRiddle() {
-            currentRiddle = riddleBank[Math.floor(random(riddleBank.length))];
+        function selectCat(key, cardEl) {
+            activeCatKey = key;
+            activeRiddle = null;
+            const cat = cats[key];
+            renderCats();
+            if (cardEl) {
+                const freshCard = el.catsRow.children[Object.keys(cats).indexOf(key)];
+                freshCard.classList.add('bounce');
+            }
+            say(line(cat, cat.dialogue.greet[cat.mood]), 'pop');
+            renderChoices();
         }
 
-        function preload() {
-            catImage = loadImage('cat.png');
+        function renderChoices() {
+            el.choices.innerHTML = '';
+            const cat = cats[activeCatKey];
+            if (!cat) return;
+            cat.actions.forEach(action => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'choice-btn';
+                btn.textContent = actionLabels[action];
+                btn.addEventListener('click', () => handleAction(action));
+                el.choices.appendChild(btn);
+            });
         }
 
-        function setup() {
-            let canvas = createCanvas(1000, 1000);
-            canvas.parent(document.body);
-            canvas.style('display', 'block'); // To ensure the canvas is centered
-
-            // Define interaction zones for cats (x, y, width, height)
-            catZones.push({ x: 88.5, y: 793, w: 148, h: 169, name: 'Left Cat' }); // Left cat
-            catZones.push({ x: 400.5, y: 693, w: 283, h: 269, name: 'Middle Cat' }); // Middle cat
-            catZones.push({ x: 712.5, y: 789, w: 236, h: 191, name: 'Right Cat' }); // Right cat
-
-            // Define interaction zones for doors (x, y, width, height)
-            doorZones.push({ x: 100.5, y: 329, w: 224, h: 445, name: 'Left Door' }); // Left door
-            doorZones.push({ x: 403.5, y: 335, w: 208, h: 440, name: 'Middle Door' }); // Middle door
-            doorZones.push({ x: 697.5, y: 336, w: 197, h: 442, name: 'Right Door' }); // Right door
+        function handleAction(action) {
+            const cat = cats[activeCatKey];
+            if (action === 'pet') handlePet(cat);
+            else if (action === 'treat') handleTreat(cat);
+            else if (action === 'talk') handleTalk(cat);
+            else if (action === 'riddle') startRiddle(cat);
         }
 
-        function draw() {
-            if (gameEnded) {
-                // Blur the background
-                drawingContext.filter = 'blur(5px)';
+        function handlePet(cat) {
+            const nextMood = petMoodNext[cat.mood];
+            const rewarded = nextMood === 'Playful' && cat.mood !== 'Grumpy' && cat.mood !== 'Sleepy';
+            const msg = line(cat, cat.dialogue.pet[cat.mood]);
+            cat.mood = nextMood;
+            renderCats();
+            say(msg, 'pop');
+            if (rewarded) awardTokens(1);
+        }
+
+        function handleTreat(cat) {
+            const stealRoll = Math.random();
+            if (stealRoll < treatStealChance[cat.mood]) {
+                say(line(cat, cat.dialogue.treatSteal), 'shake');
+                return;
+            }
+            const nextMood = treatMoodNext[cat.mood];
+            const msg = line(cat, cat.dialogue.treatSuccess[cat.mood]);
+            cat.mood = nextMood;
+            renderCats();
+            say(msg, 'pop');
+            awardTokens(1);
+        }
+
+        function handleTalk(cat) {
+            say(line(cat, cat.dialogue.talk[cat.mood]), 'pop');
+        }
+
+        function startRiddle(cat) {
+            activeRiddle = riddleBank[Math.floor(Math.random() * riddleBank.length)];
+            say(activeRiddle.question, 'pop');
+            renderRiddleChoices(cat);
+        }
+
+        function renderRiddleChoices(cat) {
+            el.choices.innerHTML = '';
+            const options = shuffle([activeRiddle.correct, ...activeRiddle.distractors]);
+            options.forEach(option => {
+                const card = document.createElement('button');
+                card.type = 'button';
+                card.className = 'riddle-card';
+                card.textContent = option;
+                card.addEventListener('click', () => handleRiddleAnswer(cat, option, card));
+                el.choices.appendChild(card);
+            });
+        }
+
+        function handleRiddleAnswer(cat, option, cardEl) {
+            if (option === activeRiddle.correct) {
+                cardEl.classList.add('correct');
+                riddlesSolved++;
+                cat.mood = 'Playful';
+                renderCats();
+                say(`${cat.emoji} "${activeRiddle.correct}" — correct! ${cat.name}'s eyes gleam with approval.`, 'pop');
+                awardTokens(2);
+                activeRiddle = null;
+                setTimeout(() => renderChoices(), 700);
             } else {
-                drawingContext.filter = 'none';
-            }
-
-            // Clear background and draw main canvas elements
-            background(catImage);
-
-            // Reset drawing properties to avoid unwanted transformations
-            rectMode(CORNER);
-            textAlign(LEFT, TOP);
-            textSize(24);
-            fill(255, 100, 150);
-            noStroke();
-
-            let catZoneHighlighted = false;
-
-            // Highlight interaction zones on mouseover and display zone names
-            for (let zone of catZones) {
-                if (isMouseOverZone(zone)) {
-                    fill(255, 200, 200, 150);
-                    rect(zone.x, zone.y, zone.w, zone.h);
-                    displayZoneName(zone.name);
-                    catZoneHighlighted = true;
-                }
-            }
-
-            // Only display door zones if no cat zone is highlighted
-            let doorZoneHighlighted = false;
-            if (!catZoneHighlighted) {
-                for (let zone of doorZones) {
-                    if (isMouseOverZone(zone)) {
-                        fill(200, 255, 200, 150);
-                        rect(zone.x, zone.y, zone.w, zone.h);
-                        displayZoneName(zone.name);
-                        doorZoneHighlighted = true;
-                    }
-                }
-            }
-
-            // Show a hand cursor whenever the mouse is over something clickable
-            cursor(catZoneHighlighted || doorZoneHighlighted || isOverChoice() || isOverGlowingBall() ? HAND : ARROW);
-
-            // Display mouse coordinates
-            displayCoordinates();
-
-            // Display message if present
-            if (messageTimer > 0) {
-                displayMessage(message);
-                messageTimer--;
-            }
-
-            // Display choices if present
-            if (choices.length > 0) {
-                displayChoices();
-            }
-
-            // Display glowing ball if active
-            if (showGlowingBall) {
-                fill(255, 255, 0);
-                ellipse(glowingBall.x, glowingBall.y, 50);
-            }
-
-            // Display points
-            fill(0);
-            textAlign(LEFT, TOP);
-            text(`Points: ${points}`, 10, 10);
-
-            // Check if game has ended
-            if (points >= 15 && !gameEnded) {
-                endGame();
-            }
-
-            // Display end screen if game has ended
-            if (gameEnded) {
-                drawingContext.filter = 'none'; // Remove blur for the text
-                displayEndScreen();
+                cardEl.classList.add('wrong');
+                say(line(cat, cat.dialogue.riddleWrong || ["Try again."]), 'shake');
+                setTimeout(() => startRiddle(cat), 500);
             }
         }
 
-        function isMouseOverZone(zone) {
-            return mouseX > zone.x && mouseX < zone.x + zone.w && mouseY > zone.y && mouseY < zone.y + zone.h;
+        function resetGame() {
+            pawTokens = 0;
+            riddlesSolved = 0;
+            activeCatKey = null;
+            activeRiddle = null;
+            el.pawCount.textContent = '0';
+            el.badge.textContent = '';
+            Object.values(cats).forEach(cat => { cat.mood = cat.startMood; });
+            renderCats();
+            el.choices.innerHTML = '';
+            say("Click a cat to say hello.", 'pop');
         }
 
-        function isOverChoice() {
-            for (let i = 0; i < choices.length; i++) {
-                let choiceY = height / 2 + 100 + i * 40;
-                if (mouseX > width / 2 - 200 && mouseX < width / 2 + 200 && mouseY > choiceY - 20 && mouseY < choiceY + 20) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        el.replayBtn.addEventListener('click', resetGame);
 
-        function isOverGlowingBall() {
-            return showGlowingBall && dist(mouseX, mouseY, glowingBall.x, glowingBall.y) < 25;
-        }
-
-        function mousePressed() {
-            if (gameEnded) return; // Stop interactions if game has ended
-
-            // Handle mouse interactions
-            let choiceHandled = false;
-
-            // Handle clicking on choices
-            for (let i = 0; i < choices.length; i++) {
-                let choiceY = height / 2 + 100 + i * 40;
-                if (mouseX > width / 2 - 200 && mouseX < width / 2 + 200 && mouseY > choiceY - 20 && mouseY < choiceY + 20) {
-                    handleChoice(choices[i]);
-                    choiceHandled = true;
-                    return;
-                }
-            }
-
-            // If choice is handled, do not process further clicks
-            if (choiceHandled) return;
-
-            // Handle mouse click interactions with cat zones
-            for (let i = 0; i < catZones.length; i++) {
-                if (isMouseOverZone(catZones[i])) {
-                    activeCatIndex = i;
-                    switch (i) {
-                        case 0:
-                            activeInteraction = 'dialogue';
-                            message = generateSkyMessage();
-                            choices = [
-                                "Chase a Falling Star",
-                                "Ask About the Sky Palace",
-                                "Pet the Cat"
-                            ];
-                            break;
-                        case 1:
-                            activeInteraction = 'dialogue';
-                            message = generateForestMessage();
-                            choices = [
-                                "Play with the Ball",
-                                "Ask About the Forest",
-                                "Pet the Cat"
-                            ];
-                            break;
-                        case 2:
-                            activeInteraction = 'riddle';
-                            pickRiddle(); // a new riddle each time you approach
-                            message = currentRiddle.question;
-                            choices = shuffleArray([currentRiddle.correct, ...currentRiddle.distractors]);
-                            break;
-                    }
-                    messageTimer = 180; // Display message for 3 seconds
-                }
-            }
-
-            // Handle mouse click interactions with door zones
-            for (let i = 0; i < doorZones.length; i++) {
-                if (isMouseOverZone(doorZones[i])) {
-                    switch (i) {
-                        case 0:
-                            message = "Only those who catch the falling stars may enter the Sky Palace. Dare to chase the light of the heavens?";
-                            break;
-                        case 1:
-                            message = "Follow the glow into the Enchanted Forest. Only those with the courage to uncover the truth may pass.";
-                            break;
-                        case 2:
-                            message = "Answer the riddle to unlock the Starry Abyss. What shines in the darkness but can never be held?";
-                            break;
-                    }
-                    messageTimer = 180; // Display message for 3 seconds
-                    choices = []; // Clear choices for doors
-                }
-            }
-
-            // Handle clicking on glowing ball
-            if (showGlowingBall && dist(mouseX, mouseY, glowingBall.x, glowingBall.y) < 25) {
-                showGlowingBall = false;
-                if (ballSource && !claimedRewards.has(ballSource)) {
-                    claimedRewards.add(ballSource);
-                    points += 10;
-                }
-                ballSource = null;
-            }
-        }
-
-        function handleChoice(choice) {
-            if (activeInteraction === 'riddle') {
-                handleRiddleChoice(choice);
-            } else {
-                switch (choice) {
-                    case "Play with the Ball":
-                        if (claimedRewards.has('ball')) {
-                            message = "Ginger just watches you now — you've already played fetch with her today.";
-                        } else {
-                            message = "Ginger bats a glowing ball toward you, her eyes sparkling with excitement.";
-                            glowingBall = { x: width / 2, y: 100 };
-                            showGlowingBall = true;
-                            ballSource = 'ball';
-                        }
-                        break;
-                    case "Ask About the Forest":
-                        message = generateForestLore();
-                        break;
-                    case "Pet the Cat": {
-                        const petKey = `pet-${activeCatIndex}`;
-                        if (claimedRewards.has(petKey)) {
-                            message = "The cat headbutts your hand affectionately, but has nothing new to share.";
-                        } else {
-                            message = pick(flavorBanks.purrs);
-                            points += 5;
-                            claimedRewards.add(petKey);
-                        }
-                        break;
-                    }
-                    case "Chase a Falling Star":
-                        if (claimedRewards.has('star')) {
-                            message = "The sky is calm now — you've already claimed your falling star.";
-                        } else {
-                            message = "A star streaks down from the heavens, glowing brighter as it falls!";
-                            glowingBall = { x: random(100, width - 100), y: random(100, 300) };
-                            showGlowingBall = true;
-                            ballSource = 'star';
-                        }
-                        break;
-                    case "Ask About the Sky Palace":
-                        message = generateSkyLore();
-                        break;
-                }
-            }
-            messageTimer = 180;
-            choices = []; // Clear choices after handling one
-        }
-
-        // The riddle's correct answer, and its pool of wrong answers, are
-        // chosen fresh each visit (see pickRiddle), so this checks against
-        // whichever riddle is currently active rather than a fixed string.
-        function handleRiddleChoice(choice) {
-            if (choice === currentRiddle.correct) {
-                if (claimedRewards.has('riddle')) {
-                    message = "\"You already proved your wisdom to me,\" the cat says warmly.";
-                } else {
-                    message = `"Yes!" the cat's eyes gleam. "${currentRiddle.correct} — the Starry Abyss opens to you!"`;
-                    points += 10;
-                    claimedRewards.add('riddle');
-                }
-            } else {
-                message = pick(riddleWrongFlavor);
-            }
-        }
-
-        function displayCoordinates() {
-            fill(255);
-            textSize(24);
-            textAlign(LEFT, TOP);
-            text(`x: ${mouseX}, y: ${mouseY}`, mouseX + 10, mouseY + 10);
-        }
-
-        function displayZoneName(name) {
-            fill(0);
-            textSize(48);
-            textAlign(CENTER, CENTER);
-            text(name, width / 2, height / 2);
-        }
-
-        function displayMessage(msg) {
-            let boxPadding = 20;
-            let boxWidth = 700;
-            let textX = width / 2;
-            let textY = height / 2;
-
-            fill(255, 255, 0);
-            textSize(32);
-            textAlign(CENTER, CENTER);
-            textStyle(BOLD);
-            textWrap(WORD);
-            text(msg, textX - boxWidth / 2 + boxPadding, textY, boxWidth - boxPadding * 2);
-        }
-
-        function displayChoices() {
-            for (let i = 0; i < choices.length; i++) {
-                let choiceY = height / 2 + 100 + i * 40;
-                rectMode(CENTER);
-                fill(200);
-                rect(width / 2, choiceY, 400, 30);
-                fill(0);
-                textSize(20);
-                textAlign(CENTER, CENTER);
-                text(choices[i], width / 2, choiceY);
-            }
-            // Reset rectMode to CORNER for other drawings
-            rectMode(CORNER);
-        }
-
-        function endGame() {
-            gameEnded = true;
-            document.getElementById('restart-btn').style.display = 'block';
-        }
-
-        function displayEndScreen() {
-            fill(0, 0, 0, 150);
-            rect(0, 0, width, height);
-
-            fill(255);
-            textSize(48);
-            textAlign(CENTER, CENTER);
-            text("Congratulations! You won!", width / 2, height / 2);
-        }
-
-        function restartGame() {
-            points = 0;
-            gameEnded = false;
-            message = "";
-            messageTimer = 0;
-            choices = [];
-            showGlowingBall = false;
-            glowingBall = null;
-            ballSource = null;
-            activeCatIndex = -1;
-            activeInteraction = null;
-            currentRiddle = null;
-            claimedRewards.clear();
-            document.getElementById('restart-btn').style.display = 'none';
-        }
+        renderCats();
     </script>
 </body>
 </html>
