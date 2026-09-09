@@ -30,7 +30,7 @@
         .rating {
             margin-top: 10px;
         }
-        #submit-btn {
+        .action-btn {
             margin-top: 20px;
             padding: 10px 20px;
             font-size: 1em;
@@ -41,7 +41,7 @@
             border-radius: 4px;
             transition: background-color 0.3s;
         }
-        #submit-btn:hover {
+        .action-btn:hover {
             background-color: #33cc33;
         }
         #top-genres, #recommendations {
@@ -66,67 +66,102 @@
     <h1>Switch Game Recommender</h1>
     <div id="games"></div>
     <div id="preferences"></div>
-    <button id="submit-btn" onclick="displayTopGenresAndRecommendations()">Submit Ratings</button>
+    <button id="submit-btn" class="action-btn" onclick="displayTopGenresAndRecommendations()">Submit Ratings</button>
     <div id="top-genres"></div>
     <div id="recommendations"></div>
+    <button id="more-btn" class="action-btn" onclick="loadMoreGames()" style="display:none;">Rate More Games</button>
 
     <script>
         const genrePreferences = {};
         let allGames = [];
-        let ratedGames = [];
+        const ratedGames = new Set();
+        const BATCH_SIZE = 5;
 
         fetch('./Switchgame.json')
             .then(response => response.json())
             .then(gamesJson => {
                 allGames = gamesJson;
-                const randomGames = getRandomGames(allGames, 5);
-                displayGames(randomGames);
+                loadNextBatch();
             })
             .catch(error => console.error('Error fetching JSON:', error));
 
-        function getRandomGames(games, count) {
-            const shuffled = games.sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, count);
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, ch => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[ch]));
+        }
+
+        // Unbiased Fisher-Yates shuffle (Array.sort(() => Math.random() - 0.5) is not uniform)
+        function shuffle(array) {
+            const result = array.slice();
+            for (let i = result.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [result[i], result[j]] = [result[j], result[i]];
+            }
+            return result;
+        }
+
+        function loadNextBatch() {
+            document.getElementById('more-btn').style.display = 'none';
+            const unratedGames = allGames.filter(game => !ratedGames.has(game.title));
+            if (unratedGames.length === 0) {
+                document.getElementById('games').innerHTML = "<p>You've rated every game we have! Check your recommendations above.</p>";
+                return;
+            }
+            displayGames(shuffle(unratedGames).slice(0, BATCH_SIZE));
+        }
+
+        function loadMoreGames() {
+            loadNextBatch();
+            document.getElementById('games').scrollIntoView({ behavior: 'smooth' });
         }
 
         function displayGames(games) {
             const gamesContainer = document.getElementById('games');
+            gamesContainer.innerHTML = '';
             games.forEach(game => {
-                ratedGames.push(game.title);
+                ratedGames.add(game.title);
                 const gameDiv = document.createElement('div');
                 gameDiv.classList.add('game-container');
 
                 gameDiv.innerHTML = `
-                    <div class="game-title">${game.title}</div>
-                    <div>Developer: ${game.developer}</div>
-                    <div>Publisher: ${game.publisher}</div>
-                    <div>Year: ${game.year}</div>
-                    <div>Genre: ${game.genre}</div>
-                    <div>Number of Players: ${game.players}</div>
-                    <div>ESRB Rating: ${game.esrb_rating}</div>
-                    <div>Supported Languages: ${game.supported_languages.join(', ')}</div>
+                    <div class="game-title">${escapeHtml(game.title)}</div>
+                    <div>Developer: ${escapeHtml(game.developer)}</div>
+                    <div>Publisher: ${escapeHtml(game.publisher)}</div>
+                    <div>Year: ${escapeHtml(game.year)}</div>
+                    <div>Genre: ${escapeHtml(game.genre)}</div>
+                    <div>Number of Players: ${escapeHtml(game.players)}</div>
+                    <div>ESRB Rating: ${escapeHtml(game.esrb_rating)}</div>
+                    <div>Supported Languages: ${escapeHtml(game.supported_languages.join(', '))}</div>
                     <div class="rating">
                         <label>Rate this game:</label><br>
-                        <label><input type="radio" name="rating-${game.title}" value="1" onchange="handleRating('${game.genre}', 1)"> 1</label>
-                        <label><input type="radio" name="rating-${game.title}" value="2" onchange="handleRating('${game.genre}', 2)"> 2</label>
-                        <label><input type="radio" name="rating-${game.title}" value="3" onchange="handleRating('${game.genre}', 3)"> 3</label>
-                        <label><input type="radio" name="rating-${game.title}" value="4" onchange="handleRating('${game.genre}', 4)"> 4</label>
-                        <label><input type="radio" name="rating-${game.title}" value="5" onchange="handleRating('${game.genre}', 5)"> 5</label>
-                        <label><input type="radio" name="rating-${game.title}" value="haven't played" onchange="handleRating('${game.genre}', 'haven't played')"> Haven't played it</label>
+                        <label><input type="radio" name="rating-${escapeHtml(game.title)}" value="1"> 1</label>
+                        <label><input type="radio" name="rating-${escapeHtml(game.title)}" value="2"> 2</label>
+                        <label><input type="radio" name="rating-${escapeHtml(game.title)}" value="3"> 3</label>
+                        <label><input type="radio" name="rating-${escapeHtml(game.title)}" value="4"> 4</label>
+                        <label><input type="radio" name="rating-${escapeHtml(game.title)}" value="5"> 5</label>
+                        <label><input type="radio" name="rating-${escapeHtml(game.title)}" value="haven't played"> Haven't played it</label>
                     </div>
                 `;
+
+                gameDiv.querySelectorAll('.rating input[type="radio"]').forEach(input => {
+                    input.addEventListener('change', () => handleRating(game.genre, input.value));
+                });
 
                 gamesContainer.appendChild(gameDiv);
             });
         }
 
-        function handleRating(genre, rating) {
-            if (rating >= 3) {
-                if (genrePreferences[genre]) {
-                    genrePreferences[genre] += 1;
-                } else {
-                    genrePreferences[genre] = 1;
-                }
+        // Ratings of 3+ add their value to the genre's score, so a 5 counts
+        // more than a 3 instead of every rating >=3 counting the same.
+        function handleRating(genre, ratingValue) {
+            const rating = Number(ratingValue);
+            if (!Number.isNaN(rating) && rating >= 3) {
+                genrePreferences[genre] = (genrePreferences[genre] || 0) + rating;
             }
             updatePreferencesDisplay();
         }
@@ -134,9 +169,14 @@
         function updatePreferencesDisplay() {
             const preferencesContainer = document.getElementById('preferences');
             preferencesContainer.innerHTML = '<h2>Genre Preferences</h2>';
-            for (const genre in genrePreferences) {
-                preferencesContainer.innerHTML += `<div>${genre}: ${genrePreferences[genre]}</div>`;
+            const sorted = Object.entries(genrePreferences).sort((a, b) => b[1] - a[1]);
+            if (sorted.length === 0) {
+                preferencesContainer.innerHTML += '<div>Rate a game 3 stars or higher to start building your genre preferences.</div>';
+                return;
             }
+            sorted.forEach(([genre, score]) => {
+                preferencesContainer.innerHTML += `<div>${escapeHtml(genre)}: ${score} pts</div>`;
+            });
         }
 
         function displayTopGenresAndRecommendations() {
@@ -145,46 +185,54 @@
             const topGenresContainer = document.getElementById('top-genres');
             const recommendationsContainer = document.getElementById('recommendations');
 
-            topGenresContainer.innerHTML = '<h2>Top 3 Genres Based on Your Ratings</h2>';
+            topGenresContainer.innerHTML = '<h2>Top Genres Based on Your Ratings</h2>';
             if (topGenres.length === 0) {
-                topGenresContainer.innerHTML += '<div>No genres rated yet.</div>';
+                topGenresContainer.innerHTML += '<div>Rate a few games 3 stars or higher to see your top genres.</div>';
                 recommendationsContainer.innerHTML = '';
+                document.getElementById('more-btn').style.display = 'inline-block';
                 return;
-            } else {
-                topGenres.forEach(([genre, count]) => {
-                    topGenresContainer.innerHTML += `<div>${genre}: ${count} ratings</div>`;
-                });
             }
-
-            // Recommend 3 games from the top genres, excluding already rated games
-            const recommendations = [];
-            topGenres.forEach(([genre]) => {
-                allGames.forEach(game => {
-                    if (game.genre === genre && !ratedGames.includes(game.title) && recommendations.length < 3) {
-                        recommendations.push(game);
-                    }
-                });
+            topGenres.forEach(([genre, score]) => {
+                topGenresContainer.innerHTML += `<div>${escapeHtml(genre)}: ${score} pts</div>`;
             });
+
+            // Fill 3 recommendations from your strongest genre first; if a
+            // genre runs out of unrated games, fall back to the next
+            // strongest genre instead of leaving the list short.
+            const recommendations = [];
+            const seen = new Set();
+            for (const [genre] of sortedGenres) {
+                if (recommendations.length >= 3) break;
+                for (const game of allGames) {
+                    if (recommendations.length >= 3) break;
+                    if (game.genre === genre && !ratedGames.has(game.title) && !seen.has(game.title)) {
+                        recommendations.push(game);
+                        seen.add(game.title);
+                    }
+                }
+            }
 
             recommendationsContainer.innerHTML = '<h2>Recommended Games for You</h2>';
             if (recommendations.length === 0) {
-                recommendationsContainer.innerHTML += '<div>No recommendations available.</div>';
+                recommendationsContainer.innerHTML += '<div>No recommendations available — looks like you\'ve rated everything in your favorite genres!</div>';
             } else {
                 recommendations.forEach(game => {
                     recommendationsContainer.innerHTML += `
                         <div class="game-container">
-                            <div class="game-title">${game.title}</div>
-                            <div>Developer: ${game.developer}</div>
-                            <div>Publisher: ${game.publisher}</div>
-                            <div>Year: ${game.year}</div>
-                            <div>Genre: ${game.genre}</div>
-                            <div>Number of Players: ${game.players}</div>
-                            <div>ESRB Rating: ${game.esrb_rating}</div>
-                            <div>Supported Languages: ${game.supported_languages.join(', ')}</div>
+                            <div class="game-title">${escapeHtml(game.title)}</div>
+                            <div>Developer: ${escapeHtml(game.developer)}</div>
+                            <div>Publisher: ${escapeHtml(game.publisher)}</div>
+                            <div>Year: ${escapeHtml(game.year)}</div>
+                            <div>Genre: ${escapeHtml(game.genre)}</div>
+                            <div>Number of Players: ${escapeHtml(game.players)}</div>
+                            <div>ESRB Rating: ${escapeHtml(game.esrb_rating)}</div>
+                            <div>Supported Languages: ${escapeHtml(game.supported_languages.join(', '))}</div>
                         </div>
                     `;
                 });
             }
+
+            document.getElementById('more-btn').style.display = 'inline-block';
         }
     </script>
 </body>
