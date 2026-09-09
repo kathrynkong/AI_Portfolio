@@ -17,6 +17,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
 </head>
 <body>
+    <button id="restart-btn" onclick="restartGame()" style="display:none; position:fixed; top:20px; right:20px; z-index:10; padding:10px 18px; font-size:1em; cursor:pointer; background:#ff69b4; color:white; border:none; border-radius:6px;">Play Again</button>
     <script>
         let catImage;
         let catZones = [];
@@ -27,6 +28,9 @@
         let points = 0;
         let glowingBall;
         let showGlowingBall = false;
+        let ballSource = null; // which reward spawned the current glowing ball ('ball' | 'star')
+        let activeCatIndex = -1; // which cat's dialogue is currently open
+        let claimedRewards = new Set(); // one-time reward keys already collected
         let gameEnded = false;
 
         function preload() {
@@ -80,15 +84,20 @@
             }
 
             // Only display door zones if no cat zone is highlighted
+            let doorZoneHighlighted = false;
             if (!catZoneHighlighted) {
                 for (let zone of doorZones) {
                     if (isMouseOverZone(zone)) {
                         fill(200, 255, 200, 150);
                         rect(zone.x, zone.y, zone.w, zone.h);
                         displayZoneName(zone.name);
+                        doorZoneHighlighted = true;
                     }
                 }
             }
+
+            // Show a hand cursor whenever the mouse is over something clickable
+            cursor(catZoneHighlighted || doorZoneHighlighted || isOverChoice() || isOverGlowingBall() ? HAND : ARROW);
 
             // Display mouse coordinates
             displayCoordinates();
@@ -131,6 +140,20 @@
             return mouseX > zone.x && mouseX < zone.x + zone.w && mouseY > zone.y && mouseY < zone.y + zone.h;
         }
 
+        function isOverChoice() {
+            for (let i = 0; i < choices.length; i++) {
+                let choiceY = height / 2 + 100 + i * 40;
+                if (mouseX > width / 2 - 200 && mouseX < width / 2 + 200 && mouseY > choiceY - 20 && mouseY < choiceY + 20) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function isOverGlowingBall() {
+            return showGlowingBall && dist(mouseX, mouseY, glowingBall.x, glowingBall.y) < 25;
+        }
+
         function mousePressed() {
             if (gameEnded) return; // Stop interactions if game has ended
 
@@ -153,6 +176,7 @@
             // Handle mouse click interactions with cat zones
             for (let i = 0; i < catZones.length; i++) {
                 if (isMouseOverZone(catZones[i])) {
+                    activeCatIndex = i;
                     switch (i) {
                         case 0:
                             message = "Bring me the shimmer of the cosmos, and I shall grant you the Sky Palace's secret.";
@@ -204,29 +228,50 @@
 
             // Handle clicking on glowing ball
             if (showGlowingBall && dist(mouseX, mouseY, glowingBall.x, glowingBall.y) < 25) {
-                points += 10;
                 showGlowingBall = false;
+                if (ballSource && !claimedRewards.has(ballSource)) {
+                    claimedRewards.add(ballSource);
+                    points += 10;
+                }
+                ballSource = null;
             }
         }
 
         function handleChoice(choice) {
             switch (choice) {
                 case "Play with the Ball":
-                    message = "Ginger bats a glowing ball toward you, her eyes sparkling with excitement.";
-                    glowingBall = { x: width / 2, y: 100 };
-                    showGlowingBall = true;
+                    if (claimedRewards.has('ball')) {
+                        message = "Ginger just watches you now — you've already played fetch with her today.";
+                    } else {
+                        message = "Ginger bats a glowing ball toward you, her eyes sparkling with excitement.";
+                        glowingBall = { x: width / 2, y: 100 };
+                        showGlowingBall = true;
+                        ballSource = 'ball';
+                    }
                     break;
                 case "Ask About the Forest":
                     message = "The Enchanted Forest is full of secrets. Bring me a golden leaf, and I might tell you more.";
                     break;
-                case "Pet the Cat":
-                    message = "The cat purrs loudly, leaning into your touch. \"Hmm, you know how to treat royalty! Maybe I’ll help you on your journey.\"";
-                    points += 5;
+                case "Pet the Cat": {
+                    const petKey = `pet-${activeCatIndex}`;
+                    if (claimedRewards.has(petKey)) {
+                        message = "The cat headbutts your hand affectionately, but has nothing new to share.";
+                    } else {
+                        message = "The cat purrs loudly, leaning into your touch. \"Hmm, you know how to treat royalty! Maybe I’ll help you on your journey.\"";
+                        points += 5;
+                        claimedRewards.add(petKey);
+                    }
                     break;
+                }
                 case "Chase a Falling Star":
-                    message = "A star streaks down from the heavens, glowing brighter as it falls!";
-                    glowingBall = { x: random(100, width - 100), y: random(100, 300) };
-                    showGlowingBall = true;
+                    if (claimedRewards.has('star')) {
+                        message = "The sky is calm now — you've already claimed your falling star.";
+                    } else {
+                        message = "A star streaks down from the heavens, glowing brighter as it falls!";
+                        glowingBall = { x: random(100, width - 100), y: random(100, 300) };
+                        showGlowingBall = true;
+                        ballSource = 'star';
+                    }
                     break;
                 case "Ask About the Sky Palace":
                     message = "The Sky Palace floats among the clouds, home to those who dare to reach for the stars.";
@@ -235,8 +280,13 @@
                     message = "\"Close,\" the cat purrs, \"but the moon can be seen for a whole night. Try again, seeker.\"";
                     break;
                 case "A Star":
-                    message = "\"Yes!\" the cat's eyes gleam. \"A star shines but can never be held. The Starry Abyss opens to you!\"";
-                    points += 10;
+                    if (claimedRewards.has('riddle')) {
+                        message = "\"You already proved your wisdom to me,\" the cat says warmly.";
+                    } else {
+                        message = "\"Yes!\" the cat's eyes gleam. \"A star shines but can never be held. The Starry Abyss opens to you!\"";
+                        points += 10;
+                        claimedRewards.add('riddle');
+                    }
                     break;
                 case "A Flame":
                     message = "\"A flame can be held, foolish traveler,\" the cat says with a smirk. \"Think again.\"";
@@ -291,6 +341,7 @@
 
         function endGame() {
             gameEnded = true;
+            document.getElementById('restart-btn').style.display = 'block';
         }
 
         function displayEndScreen() {
@@ -301,6 +352,20 @@
             textSize(48);
             textAlign(CENTER, CENTER);
             text("Congratulations! You won!", width / 2, height / 2);
+        }
+
+        function restartGame() {
+            points = 0;
+            gameEnded = false;
+            message = "";
+            messageTimer = 0;
+            choices = [];
+            showGlowingBall = false;
+            glowingBall = null;
+            ballSource = null;
+            activeCatIndex = -1;
+            claimedRewards.clear();
+            document.getElementById('restart-btn').style.display = 'none';
         }
     </script>
 </body>
