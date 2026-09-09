@@ -33,7 +33,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 18px;
+            margin-bottom: 12px;
         }
 
         .hud h1 {
@@ -60,6 +60,31 @@
             margin-left: 8px;
         }
 
+        details.how-to-play {
+            background: #fdf0dc;
+            border: 2px solid #e0bd8c;
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            font-size: 0.92em;
+            line-height: 1.5;
+        }
+
+        details.how-to-play summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #a8622b;
+        }
+
+        details.how-to-play ul {
+            margin: 10px 0 4px;
+            padding-left: 20px;
+        }
+
+        details.how-to-play li {
+            margin-bottom: 6px;
+        }
+
         .cats-row {
             display: flex;
             gap: 16px;
@@ -74,7 +99,7 @@
             background: #fff3e0;
             border: 3px solid #e8c9a0;
             border-radius: 16px;
-            padding: 16px;
+            padding: 14px;
             text-align: center;
             cursor: pointer;
             font-family: inherit;
@@ -96,9 +121,13 @@
             animation: bounce 0.4s ease;
         }
 
-        .cat-emoji {
-            font-size: 3em;
-            line-height: 1;
+        .cat-portrait {
+            line-height: 0;
+        }
+
+        .cat-portrait svg {
+            width: 72px;
+            height: 72px;
         }
 
         .cat-name {
@@ -269,6 +298,21 @@
             <div class="paw-tokens" id="paw-tokens">Paw Tokens: <span id="paw-count">0</span><span class="badge" id="badge"></span></div>
         </div>
 
+        <details class="how-to-play">
+            <summary>❓ How to Play</summary>
+            <ul>
+                <li><strong>Goal:</strong> win over two cats — Mochi and Professor Paws — by choosing how to interact with them.</li>
+                <li>Each cat has a <strong>mood</strong>: Curious, Sleepy, Grumpy, or Playful. Their portrait and reactions change with it.</li>
+                <li><strong>Pet</strong> and <strong>Offer a Treat</strong> shift a cat's mood. Petting a Grumpy or Sleepy cat won't pay off — warm them up with a treat first.</li>
+                <li>A treat can also be <strong>stolen</strong> outright — the grumpier the cat, the more likely.</li>
+                <li><strong>Ask a Question</strong> just gets you flavor/lore — no reward, no risk.</li>
+                <li>Professor Paws will <strong>Solve a Riddle</strong> with you: pick one of three answers. Wrong answers keep the same riddle so you can try again; a correct answer pays out and ends the riddle.</li>
+                <li><strong>Paw Tokens</strong> are earned the <em>first time</em> an action wins a cat over. Once you've won a cat over with a given action, repeating it won't keep earning tokens — but the cat's still glad to see you.</li>
+                <li>Solve <strong>3 riddles</strong> to unlock the 🏅 Riddle Sage badge.</li>
+                <li>Hit <strong>Play Again</strong> any time for a fresh round — dialogue and riddles are assembled differently each time.</li>
+            </ul>
+        </details>
+
         <div class="cats-row" id="cats-row"></div>
 
         <div class="scene-panel">
@@ -282,76 +326,163 @@
     </div>
 
     <script>
-        // --- Game data -----------------------------------------------------
-        // Each cat has its own personality, expressed as its own word banks
-        // per action per mood. Procedural output is a function of
-        // (cat personality, action, current mood, random pick) — not just a
-        // single global pool of random sentences.
+        // --- Character portraits --------------------------------------------
+        // Lightweight inline SVG, built from a shared eye/mouth library keyed
+        // by mood so no image assets are loaded and no extra network request
+        // is made. Each cat supplies only its own coat colors + an optional
+        // "professor" accessory; the four expressions are shared geometry.
+        function eyesFor(mood) {
+            switch (mood) {
+                case 'Curious':
+                    return `
+                        <circle cx="38" cy="48" r="7" fill="#2b2320"/>
+                        <circle cx="62" cy="48" r="7" fill="#2b2320"/>
+                        <circle cx="40" cy="45" r="2" fill="#fff"/>
+                        <circle cx="64" cy="45" r="2" fill="#fff"/>
+                        <path d="M30 38 Q38 33 46 38" stroke="#2b2320" stroke-width="2" fill="none"/>
+                        <path d="M54 38 Q62 33 70 38" stroke="#2b2320" stroke-width="2" fill="none"/>`;
+                case 'Sleepy':
+                    return `
+                        <path d="M31 48 Q38 52 45 48" stroke="#2b2320" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                        <path d="M55 48 Q62 52 69 48" stroke="#2b2320" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                        <text x="76" y="26" font-size="11" fill="#a3927c" font-family="inherit">z</text>
+                        <text x="82" y="18" font-size="8" fill="#a3927c" font-family="inherit">z</text>`;
+                case 'Grumpy':
+                    return `
+                        <path d="M30 41 L46 46" stroke="#2b2320" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M70 41 L54 46" stroke="#2b2320" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M32 51 L44 51" stroke="#2b2320" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M56 51 L68 51" stroke="#2b2320" stroke-width="2.5" stroke-linecap="round"/>`;
+                case 'Playful':
+                    return `
+                        <path d="M31 50 Q38 41 45 50" stroke="#2b2320" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                        <path d="M55 50 Q62 41 69 50" stroke="#2b2320" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+            }
+        }
+
+        function mouthFor(mood) {
+            switch (mood) {
+                case 'Curious':
+                    return `<path d="M45 66 Q50 70 55 66" stroke="#2b2320" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+                case 'Sleepy':
+                    return `<path d="M46 67 Q50 68 54 67" stroke="#2b2320" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+                case 'Grumpy':
+                    return `<path d="M44 70 Q50 64 56 70" stroke="#2b2320" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+                case 'Playful':
+                    return `
+                        <path d="M42 65 Q50 76 58 65" stroke="#2b2320" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                        <path d="M50 71 L50 75" stroke="#e2823f" stroke-width="3" stroke-linecap="round"/>`;
+            }
+        }
+
+        function catSvg(cat) {
+            const mood = cat.mood;
+            return `
+                <svg viewBox="0 0 100 100" role="img" aria-label="${cat.name}, looking ${mood}">
+                    <polygon points="18,38 27,8 38,34" fill="${cat.coat}"/>
+                    <polygon points="62,34 73,8 82,38" fill="${cat.coat}"/>
+                    <polygon points="22,34 27,16 33,32" fill="${cat.innerEar}"/>
+                    <polygon points="67,32 73,16 78,34" fill="${cat.innerEar}"/>
+                    <ellipse cx="50" cy="56" rx="33" ry="29" fill="${cat.coat}"/>
+                    ${cat.markings || ''}
+                    ${eyesFor(mood)}
+                    ${mouthFor(mood)}
+                    <line x1="12" y1="56" x2="28" y2="54" stroke="${cat.whisker}" stroke-width="1.5"/>
+                    <line x1="12" y1="62" x2="28" y2="61" stroke="${cat.whisker}" stroke-width="1.5"/>
+                    <line x1="72" y1="54" x2="88" y2="56" stroke="${cat.whisker}" stroke-width="1.5"/>
+                    <line x1="72" y1="61" x2="88" y2="62" stroke="${cat.whisker}" stroke-width="1.5"/>
+                    ${cat.professor ? `
+                        <circle cx="38" cy="48" r="9" fill="none" stroke="#2b2320" stroke-width="2"/>
+                        <circle cx="62" cy="48" r="9" fill="none" stroke="#2b2320" stroke-width="2"/>
+                        <line x1="47" y1="48" x2="53" y2="48" stroke="#2b2320" stroke-width="2"/>
+                        <line x1="29" y1="46" x2="22" y2="42" stroke="#2b2320" stroke-width="2"/>
+                        <line x1="71" y1="46" x2="78" y2="42" stroke="#2b2320" stroke-width="2"/>
+                    ` : ''}
+                </svg>`;
+        }
+
+        // --- Game data -------------------------------------------------------
         const MOODS = ['Curious', 'Sleepy', 'Grumpy', 'Playful'];
 
         const cats = {
             mochi: {
                 key: 'mochi',
                 name: 'Mochi',
-                emoji: '🐈',
                 startMood: 'Curious',
                 mood: 'Curious',
+                coat: '#e8944a',
+                innerEar: '#ffd9ad',
+                whisker: '#7a5230',
+                professor: false,
+                markings: `
+                    <path d="M30 40 Q35 44 32 50" stroke="#c97430" stroke-width="3" fill="none" opacity="0.5"/>
+                    <path d="M70 40 Q65 44 68 50" stroke="#c97430" stroke-width="3" fill="none" opacity="0.5"/>`,
                 actions: ['pet', 'treat', 'talk'],
+                tokenHistory: new Set(),
                 dialogue: {
                     greet: {
-                        Curious: ["{cat} looks up at you, ears perked with interest."],
-                        Sleepy: ["{cat} blinks slowly at you from a warm patch of sun."],
-                        Grumpy: ["{cat} eyes you suspiciously from across the room."],
-                        Playful: ["{cat} bounds over, tail high, ready for anything."]
+                        Curious: { opening: ["{cat} looks up at you", "{cat} perks her ears toward you", "{cat} tilts her head your way"], ending: ["clearly curious what you're up to.", "ready to investigate.", "eyes wide with interest."] },
+                        Sleepy: { opening: ["{cat} blinks slowly at you", "{cat} peers out from a warm patch of sun", "{cat} lifts one eyelid"], ending: ["too drowsy to do much else.", "not quite ready to move.", "debating whether you're worth waking up for."] },
+                        Grumpy: { opening: ["{cat} eyes you from across the room", "{cat}'s tail flicks warily", "{cat} watches you approach"], ending: ["clearly unimpressed.", "not in the mood for company.", "guarding her space."] },
+                        Playful: { opening: ["{cat} bounds over", "{cat}'s tail shoots straight up", "{cat} trots toward you eagerly"], ending: ["ready for anything.", "tail swishing with excitement.", "clearly hoping for fun."] }
                     },
                     pet: {
-                        Grumpy: ["{cat} flattens her ears and swats at your hand — not today.", "{cat} backs away with a soft warning growl."],
-                        Sleepy: ["{cat} cracks one eye open, allows a single pat, then dozes right back off.", "{cat} leans into your hand without fully waking up."],
-                        Curious: ["{cat} sniffs your fingers thoroughly before allowing a scratch behind the ears.", "{cat} tilts her head, studying you, then permits a gentle pat."],
-                        Playful: ["{cat} headbutts your hand and rolls over for belly rubs.", "{cat} purrs loudly and bats playfully at your sleeve."]
+                        Grumpy: { opening: ["{cat} flattens her ears", "{cat} stiffens at your touch", "{cat}'s tail lashes"], reaction: ["and swats at your hand", "and takes a step back", "and lets out a low warning growl"], detail: ["clearly not in the mood for affection", "still wary of you", "unwilling to let her guard down"], ending: ["Not today.", "Maybe later.", "Try warming her up first."] },
+                        Sleepy: { opening: ["{cat} cracks one eye open", "{cat} barely stirs", "{cat} shifts slightly"], reaction: ["and allows a single pat", "and leans in just a little", "and lets you scratch once"], detail: ["before dozing right back off", "without fully waking up", "too comfortable to protest much"], ending: ["Sweet dreams, {cat}.", "She's content, at least.", "A small victory."] },
+                        Curious: { opening: ["{cat} sniffs your fingers", "{cat} studies your hand", "{cat} leans in curiously"], reaction: ["before allowing a scratch behind the ears", "then permits a gentle pat", "and decides you're trustworthy enough"], detail: ["whiskers twitching with interest", "watching you closely the whole time", "clearly weighing her options"], ending: ["She approves, for now.", "A good sign.", "Progress!"] },
+                        Playful: { opening: ["{cat} headbutts your hand", "{cat} rolls onto her back", "{cat} bats playfully at your sleeve"], reaction: ["and demands more attention", "purring loudly the whole time", "practically vibrating with joy"], detail: ["completely delighted by the fuss", "having the time of her life", "in full lap-cat mode"], ending: ["She's all yours now.", "Best friends, officially.", "This is the good stuff."] }
                     },
                     treatSuccess: {
-                        Grumpy: ["{cat} cautiously sniffs the salmon treat, then decides you may be acceptable after all."],
-                        Sleepy: ["{cat} opens one eye, sniffs the treat, and accepts it without much enthusiasm."],
-                        Curious: ["{cat} inspects the treat from every angle before accepting it with quiet approval."],
-                        Playful: ["{cat} pounces on the treat like it's the best thing that's ever happened to her."]
+                        Grumpy: { opening: ["{cat} cautiously sniffs the salmon treat", "{cat} eyes the treat with suspicion", "{cat} approaches the treat slowly"], reaction: ["then decides you may be acceptable after all", "and accepts it with visible reluctance", "and takes it without quite forgiving you"], detail: ["a small truce, at least", "baby steps", "not nothing"], ending: ["Progress is progress.", "She'll remember this.", "A start."] },
+                        Sleepy: { opening: ["{cat} opens one eye at the smell", "{cat} barely lifts her head", "{cat} sniffs without really moving"], reaction: ["and accepts the treat", "and nibbles it half-asleep", "and eats it without much ceremony"], detail: ["without much enthusiasm", "too drowsy to be impressed", "content but unmoved"], ending: ["Well, she ate it.", "A quiet win.", "Good enough."] },
+                        Curious: { opening: ["{cat} inspects the treat from every angle", "{cat} sniffs it thoroughly first", "{cat} examines the offering carefully"], reaction: ["before accepting it with quiet approval", "then eats it with evident satisfaction", "and gives a small, pleased chirp"], detail: ["clearly impressed by your taste", "her curiosity rewarded", "a good sign for next time"], ending: ["She's warming up to you.", "Well played.", "Noted and appreciated."] },
+                        Playful: { opening: ["{cat} pounces on the treat", "{cat} snatches it mid-air", "{cat} does a little happy hop"], reaction: ["like it's the best thing that's ever happened to her", "and gobbles it down instantly", "then looks up for more"], detail: ["absolutely thrilled", "practically glowing with delight", "living her best life"], ending: ["Worth every bit.", "She'd do this all day.", "Friendship achieved."] }
                     },
-                    treatSteal: ["{cat} snatches the treat and bolts under the couch, pretending you were never here.", "{cat} grabs the treat and retreats to a corner, eyeing you the whole time."],
                     talk: {
-                        Grumpy: ["{cat} flicks her tail and looks away — clearly not in a chatting mood."],
-                        Sleepy: ["{cat} answers with a slow blink, too drowsy for real conversation."],
-                        Curious: ["{cat} tilts her head, seemingly considering your question very seriously."],
-                        Playful: ["{cat} bats at your hand mid-sentence, more interested in play than talk."]
-                    }
+                        Grumpy: { opening: ["{cat} flicks her tail and looks away", "{cat} ignores the question entirely", "{cat} turns her back on you"], ending: ["clearly not in a chatting mood.", "not today, apparently.", "some other time, maybe."] },
+                        Sleepy: { opening: ["{cat} answers with a slow blink", "{cat} mumbles something into her paws", "{cat} barely opens her eyes"], ending: ["too drowsy for real conversation.", "half-asleep the whole time.", "she'll explain later, maybe."] },
+                        Curious: { opening: ["{cat} tilts her head", "{cat}'s ears swivel toward you", "{cat} watches you intently"], ending: ["seemingly considering your question very seriously.", "genuinely curious what you meant.", "hanging on every word."] },
+                        Playful: { opening: ["{cat} bats at your hand mid-sentence", "{cat} tumbles over mid-conversation", "{cat} chases her own tail instead of answering"], ending: ["more interested in play than talk.", "clearly not taking this seriously.", "conversation optional, apparently."] }
+                    },
+                    treatSteal: ["{cat} snatches the treat and bolts under the couch, pretending you were never here.", "{cat} grabs the treat and retreats to a corner, eyeing you the whole time.", "{cat} swipes the treat and vanishes before you can blink."],
+                    petWonOver: ["{cat} nuzzles your hand fondly — you've already won her over.", "{cat} headbutts your hand happily; there's nothing left to prove here."],
+                    treatWonOver: ["{cat} eats the treat contentedly, already fully won over.", "{cat} accepts the treat like an old friend — no further proof needed."]
                 }
             },
             paws: {
                 key: 'paws',
                 name: 'Professor Paws',
-                emoji: '🐈‍⬛',
                 startMood: 'Sleepy',
                 mood: 'Sleepy',
+                coat: '#4a4550',
+                innerEar: '#786f82',
+                whisker: '#d8d3e0',
+                professor: true,
+                markings: '',
                 actions: ['pet', 'talk', 'riddle'],
+                tokenHistory: new Set(),
                 dialogue: {
                     greet: {
-                        Curious: ["{cat} regards you over the rim of an invisible pair of spectacles."],
-                        Sleepy: ["{cat} is curled up mid-nap and only half acknowledges you."],
-                        Grumpy: ["{cat} sighs, as if your presence interrupts something important."],
-                        Playful: ["{cat} sets aside his dignity for a moment, tail twitching with interest."]
+                        Curious: { opening: ["{cat} regards you", "{cat} glances up from his thoughts", "{cat} studies you"], ending: ["over the rim of an invisible pair of spectacles.", "with the air of someone about to test you.", "as though cataloguing your intentions."] },
+                        Sleepy: { opening: ["{cat} is curled up mid-nap", "{cat} barely lifts his head", "{cat} stays exactly where he is"], ending: ["and only half acknowledges you.", "unwilling to be disturbed.", "his nap taking clear priority."] },
+                        Grumpy: { opening: ["{cat} sighs audibly", "{cat}'s tail flicks once", "{cat} regards you flatly"], ending: ["as if your presence interrupts something important.", "clearly unimpressed by the interruption.", "with the patience of someone very tired of visitors."] },
+                        Playful: { opening: ["{cat} sets aside his dignity for a moment", "{cat}'s tail twitches with interest", "{cat} actually perks up"], ending: ["ready, for once, to play along.", "surprisingly eager to engage.", "tail twitching with unusual interest."] }
                     },
                     pet: {
-                        Grumpy: ["{cat} narrows his eyes and steps just out of reach.", "{cat} issues a single, unimpressed hiss."],
-                        Sleepy: ["{cat} barely stirs, tolerating the pat with visible effort.", "{cat} allows one pat before returning to his nap."],
-                        Curious: ["{cat} studies your hand like a specimen before allowing contact.", "{cat} permits a scratch, clearly evaluating you as he does."],
-                        Playful: ["{cat} surprises you with an actual purr and a headbutt.", "{cat} swats at your hand — playfully, for once."]
+                        Grumpy: { opening: ["{cat} narrows his eyes", "{cat} stiffens", "{cat}'s ears pin back"], reaction: ["and steps just out of reach", "and issues a single, unimpressed hiss", "and turns pointedly away"], detail: ["clearly unwilling to be handled right now", "in no mood for familiarity", "guarding his composure"], ending: ["Respect the boundary.", "Noted, professor.", "Try again later."] },
+                        Sleepy: { opening: ["{cat} barely stirs", "{cat} cracks one eye", "{cat} shifts an inch"], reaction: ["tolerating the pat with visible effort", "allowing one pat before returning to his nap", "permitting brief contact"], detail: ["clearly prioritizing sleep over sentiment", "half-present at best", "conserving his energy"], ending: ["Let him rest.", "A small allowance.", "He'll remember the gesture, probably."] },
+                        Curious: { opening: ["{cat} studies your hand", "{cat} considers the gesture", "{cat} watches carefully"], reaction: ["like a specimen before allowing contact", "then permits a scratch, evaluating you as he does", "and grants cautious approval"], detail: ["as though grading the interaction", "with academic interest", "weighing the data"], ending: ["You pass, for now.", "A passing mark.", "Noted for future reference."] },
+                        Playful: { opening: ["{cat} surprises you", "{cat} drops the act entirely", "{cat} leans into your hand"], reaction: ["with an actual purr and a headbutt", "and swats at your hand — playfully, for once", "and nearly smiles, if cats could smile"], detail: ["dignity fully abandoned", "enjoying himself despite himself", "off the clock, for once"], ending: ["Even professors need a break.", "Rare and delightful.", "Cherish this moment."] }
                     },
                     talk: {
-                        Grumpy: ["{cat} sighs. \"A question? Really?\" — and says nothing further."],
-                        Sleepy: ["{cat} mumbles something about \"later\" and closes his eyes."],
-                        Curious: ["{cat} considers your question with genuine academic interest."],
-                        Playful: ["{cat} answers your question with a riddle of his own, delighted."]
+                        Grumpy: { opening: ["{cat} sighs", "{cat} waves a paw dismissively", "{cat} pretends not to hear you"], ending: ["\"A question? Really?\" — and says nothing further.", "clearly not in the mood to lecture.", "office hours are over, apparently."] },
+                        Sleepy: { opening: ["{cat} mumbles something about \"later\"", "{cat} answers in half-formed words", "{cat} trails off mid-sentence"], ending: ["and closes his eyes.", "before drifting off entirely.", "the lecture postponed indefinitely."] },
+                        Curious: { opening: ["{cat} considers your question", "{cat} pauses thoughtfully", "{cat}'s eyes sharpen with interest"], ending: ["with genuine academic interest.", "as though it's a worthy puzzle.", "clearly intrigued."] },
+                        Playful: { opening: ["{cat} answers with a riddle of his own", "{cat} seems delighted by the question", "{cat} can't resist a clever retort"], ending: ["delighted by the exchange.", "enjoying the back-and-forth.", "in unusually good spirits."] }
                     },
-                    riddleWrong: ["{cat} yawns. \"Try again, seeker.\"", "{cat} shakes his head slowly. \"Not quite.\"", "{cat} looks unimpressed. \"Do better.\""]
+                    riddleWrong: ["{cat} yawns. \"Try again, seeker.\"", "{cat} shakes his head slowly. \"Not quite.\"", "{cat} looks unimpressed. \"Do better.\"", "{cat} taps a paw. \"Think harder.\""],
+                    petWonOver: ["{cat} allows the pat with quiet familiarity — you've already earned his approval.", "{cat} doesn't need convincing anymore; the pat is simply acceptable now."],
+                    riddleWonOver: ["{cat} tips his head. \"You've already proven your wisdom to me.\"", "{cat} accepts the correct answer with quiet pride — nothing more to prove."]
                 }
             }
         };
@@ -407,6 +538,22 @@
             return pick(pool).replace(/\{cat\}/g, cat.name);
         }
 
+        // Modular sentence assembly: opening + reaction + mood detail +
+        // ending, each with several variants. Any combination of parts reads
+        // as one grammatical sentence, so a handful of short variant lists
+        // multiply into dozens of distinct outputs instead of needing one
+        // full hand-written sentence per case.
+        function assemble(cat, parts) {
+            const segments = [];
+            if (parts.opening) segments.push(pick(parts.opening));
+            if (parts.reaction) segments.push(pick(parts.reaction));
+            let sentence = segments.join(', ');
+            if (parts.detail) sentence += ` — ${pick(parts.detail)}`;
+            sentence += '.';
+            if (parts.ending) sentence += ' ' + pick(parts.ending);
+            return sentence.replace(/\{cat\}/g, cat.name);
+        }
+
         function awardTokens(amount) {
             pawTokens += amount;
             el.pawCount.textContent = pawTokens;
@@ -432,25 +579,23 @@
                 card.type = 'button';
                 card.className = 'cat-card' + (cat.key === activeCatKey ? ' active' : '');
                 card.innerHTML = `
-                    <div class="cat-emoji">${cat.emoji}</div>
+                    <div class="cat-portrait">${catSvg(cat)}</div>
                     <div class="cat-name">${cat.name}</div>
                     <div class="cat-mood mood-${cat.mood}">${cat.mood}</div>
                 `;
-                card.addEventListener('click', () => selectCat(cat.key, card));
+                card.addEventListener('click', () => selectCat(cat.key));
                 el.catsRow.appendChild(card);
             });
         }
 
-        function selectCat(key, cardEl) {
+        function selectCat(key) {
             activeCatKey = key;
             activeRiddle = null;
             const cat = cats[key];
             renderCats();
-            if (cardEl) {
-                const freshCard = el.catsRow.children[Object.keys(cats).indexOf(key)];
-                freshCard.classList.add('bounce');
-            }
-            say(line(cat, cat.dialogue.greet[cat.mood]), 'pop');
+            const freshCard = el.catsRow.children[Object.keys(cats).indexOf(key)];
+            freshCard.classList.add('bounce');
+            say(assemble(cat, cat.dialogue.greet[cat.mood]), 'pop');
             renderChoices();
         }
 
@@ -476,41 +621,52 @@
             else if (action === 'riddle') startRiddle(cat);
         }
 
+        // A cat's mood always updates (petting/warming still "works"), but a
+        // Paw Token pays out for a given action only the first time it wins
+        // the cat over. Repeating the same successful action after that gets
+        // a distinct "already won over" line instead of another token.
         function handlePet(cat) {
             const nextMood = petMoodNext[cat.mood];
-            const rewarded = nextMood === 'Playful' && cat.mood !== 'Grumpy' && cat.mood !== 'Sleepy';
-            const msg = line(cat, cat.dialogue.pet[cat.mood]);
+            const wouldReward = nextMood === 'Playful' && cat.mood !== 'Grumpy' && cat.mood !== 'Sleepy';
+            const alreadyWonOver = wouldReward && cat.tokenHistory.has('pet');
+            const msg = alreadyWonOver ? line(cat, cat.dialogue.petWonOver) : assemble(cat, cat.dialogue.pet[cat.mood]);
             cat.mood = nextMood;
             renderCats();
             say(msg, 'pop');
-            if (rewarded) awardTokens(1);
+            if (wouldReward && !alreadyWonOver) {
+                cat.tokenHistory.add('pet');
+                awardTokens(1);
+            }
         }
 
         function handleTreat(cat) {
-            const stealRoll = Math.random();
-            if (stealRoll < treatStealChance[cat.mood]) {
+            if (Math.random() < treatStealChance[cat.mood]) {
                 say(line(cat, cat.dialogue.treatSteal), 'shake');
                 return;
             }
             const nextMood = treatMoodNext[cat.mood];
-            const msg = line(cat, cat.dialogue.treatSuccess[cat.mood]);
+            const alreadyWonOver = cat.tokenHistory.has('treat');
+            const msg = alreadyWonOver ? line(cat, cat.dialogue.treatWonOver) : assemble(cat, cat.dialogue.treatSuccess[cat.mood]);
             cat.mood = nextMood;
             renderCats();
             say(msg, 'pop');
-            awardTokens(1);
+            if (!alreadyWonOver) {
+                cat.tokenHistory.add('treat');
+                awardTokens(1);
+            }
         }
 
         function handleTalk(cat) {
-            say(line(cat, cat.dialogue.talk[cat.mood]), 'pop');
+            say(assemble(cat, cat.dialogue.talk[cat.mood]), 'pop');
         }
 
         function startRiddle(cat) {
             activeRiddle = riddleBank[Math.floor(Math.random() * riddleBank.length)];
             say(activeRiddle.question, 'pop');
-            renderRiddleChoices(cat);
+            renderRiddleChoices();
         }
 
-        function renderRiddleChoices(cat) {
+        function renderRiddleChoices() {
             el.choices.innerHTML = '';
             const options = shuffle([activeRiddle.correct, ...activeRiddle.distractors]);
             options.forEach(option => {
@@ -518,25 +674,34 @@
                 card.type = 'button';
                 card.className = 'riddle-card';
                 card.textContent = option;
-                card.addEventListener('click', () => handleRiddleAnswer(cat, option, card));
+                card.addEventListener('click', () => handleRiddleAnswer(option, card));
                 el.choices.appendChild(card);
             });
         }
 
-        function handleRiddleAnswer(cat, option, cardEl) {
+        // A wrong answer keeps activeRiddle unchanged and just reshuffles
+        // the same three cards, so "try again" means the same riddle - not
+        // a fresh, unrelated one.
+        function handleRiddleAnswer(option, cardEl) {
+            const cat = cats[activeCatKey];
             if (option === activeRiddle.correct) {
                 cardEl.classList.add('correct');
-                riddlesSolved++;
+                const alreadyProven = riddlesSolved >= 3;
                 cat.mood = 'Playful';
                 renderCats();
-                say(`${cat.emoji} "${activeRiddle.correct}" — correct! ${cat.name}'s eyes gleam with approval.`, 'pop');
-                awardTokens(2);
+                if (alreadyProven) {
+                    say(line(cat, cat.dialogue.riddleWonOver), 'pop');
+                } else {
+                    riddlesSolved++;
+                    say(`✨ "${activeRiddle.correct}" — correct! ${cat.name}'s eyes gleam with approval.`, 'pop');
+                    awardTokens(2);
+                }
                 activeRiddle = null;
                 setTimeout(() => renderChoices(), 700);
             } else {
                 cardEl.classList.add('wrong');
-                say(line(cat, cat.dialogue.riddleWrong || ["Try again."]), 'shake');
-                setTimeout(() => startRiddle(cat), 500);
+                say(line(cat, cat.dialogue.riddleWrong), 'shake');
+                setTimeout(() => renderRiddleChoices(), 500);
             }
         }
 
@@ -547,7 +712,10 @@
             activeRiddle = null;
             el.pawCount.textContent = '0';
             el.badge.textContent = '';
-            Object.values(cats).forEach(cat => { cat.mood = cat.startMood; });
+            Object.values(cats).forEach(cat => {
+                cat.mood = cat.startMood;
+                cat.tokenHistory.clear();
+            });
             renderCats();
             el.choices.innerHTML = '';
             say("Click a cat to say hello.", 'pop');
