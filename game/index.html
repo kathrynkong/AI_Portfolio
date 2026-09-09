@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple P5.js Game</title>
+    <title>Cats, Riddles &amp; Procedural Play</title>
     <style>
         body {
             display: flex;
@@ -32,6 +32,69 @@
         let activeCatIndex = -1; // which cat's dialogue is currently open
         let claimedRewards = new Set(); // one-time reward keys already collected
         let gameEnded = false;
+        let activeInteraction = null; // 'riddle' while the right cat's riddle choices are on screen
+        let currentRiddle = null; // riddle picked fresh each time the right cat is approached
+
+        // --- Procedural text generation -----------------------------------
+        // Dialogue is assembled at runtime from small word banks and a
+        // riddle pool instead of being fixed strings, so replaying the game
+        // (or just re-visiting a cat) produces different phrasing/puzzles.
+        const flavorBanks = {
+            cosmosNouns: ["comet's tail", "morning star", "aurora's edge", "midnight glow", "wandering nebula"],
+            skyAdjectives: ["shimmering", "silver-veined", "frost-lit", "star-flecked", "cloud-wreathed"],
+            forestNouns: ["golden leaf", "moonlit spring", "whispering root", "silver acorn"],
+            forestAdjectives: ["moss-cloaked", "sunlit", "tangled", "fern-shadowed"],
+            purrs: [
+                "The cat purrs loudly, leaning into your touch. \"Hmm, you know how to treat royalty! Maybe I'll help you on your journey.\"",
+                "The cat headbutts your hand and rumbles with a deep, satisfied purr. \"Not bad, for a wingless one.\"",
+                "The cat stretches luxuriously under your hand. \"Careful — I could get used to this.\""
+            ]
+        };
+
+        const riddleBank = [
+            { question: "What shines in the darkness but can never be held?", correct: "A Star", distractors: ["The Moon", "A Flame"] },
+            { question: "What grows brighter the longer you look away from it?", correct: "A Star", distractors: ["A Shadow", "A Candle"] },
+            { question: "What falls from the sky each night, yet nothing ever lands?", correct: "Starlight", distractors: ["Rain", "Snow"] }
+        ];
+
+        const riddleWrongFlavor = [
+            "\"Close,\" the cat purrs, \"but think again, seeker.\"",
+            "The cat tilts its head. \"Not quite what the stars whisper to me.\"",
+            "\"A fair guess,\" the cat says, \"but the Starry Abyss wants better.\""
+        ];
+
+        function pick(list) {
+            return list[Math.floor(random(list.length))];
+        }
+
+        function shuffleArray(list) {
+            const result = list.slice();
+            for (let i = result.length - 1; i > 0; i--) {
+                const j = Math.floor(random(i + 1));
+                [result[i], result[j]] = [result[j], result[i]];
+            }
+            return result;
+        }
+
+        function generateSkyMessage() {
+            return `Bring me the ${pick(flavorBanks.cosmosNouns)}, and I shall grant you the ${pick(flavorBanks.skyAdjectives)} Sky Palace's secret.`;
+        }
+
+        function generateForestMessage() {
+            return `Chase the ball, and the ${pick(flavorBanks.forestAdjectives)} Enchanted Forest will open its heart to you.`;
+        }
+
+        function generateForestLore() {
+            return `The Enchanted Forest is full of secrets. Bring me a ${pick(flavorBanks.forestNouns)}, and I might tell you more.`;
+        }
+
+        function generateSkyLore() {
+            return `The Sky Palace floats among the ${pick(flavorBanks.skyAdjectives)} clouds, home to those who dare to reach for the stars.`;
+        }
+
+        function pickRiddle() {
+            currentRiddle = riddleBank[Math.floor(random(riddleBank.length))];
+        }
 
         function preload() {
             catImage = loadImage('cat.png');
@@ -179,7 +242,8 @@
                     activeCatIndex = i;
                     switch (i) {
                         case 0:
-                            message = "Bring me the shimmer of the cosmos, and I shall grant you the Sky Palace's secret.";
+                            activeInteraction = 'dialogue';
+                            message = generateSkyMessage();
                             choices = [
                                 "Chase a Falling Star",
                                 "Ask About the Sky Palace",
@@ -187,7 +251,8 @@
                             ];
                             break;
                         case 1:
-                            message = "Chase the ball, and the Enchanted Forest will open its heart to you.";
+                            activeInteraction = 'dialogue';
+                            message = generateForestMessage();
                             choices = [
                                 "Play with the Ball",
                                 "Ask About the Forest",
@@ -195,12 +260,10 @@
                             ];
                             break;
                         case 2:
-                            message = "The stars whisper their secrets to me. Prove you understand their song, and the Starry Abyss shall be yours.";
-                            choices = [
-                                "The Moon",
-                                "A Star",
-                                "A Flame"
-                            ];
+                            activeInteraction = 'riddle';
+                            pickRiddle(); // a new riddle each time you approach
+                            message = currentRiddle.question;
+                            choices = shuffleArray([currentRiddle.correct, ...currentRiddle.distractors]);
                             break;
                     }
                     messageTimer = 180; // Display message for 3 seconds
@@ -238,62 +301,68 @@
         }
 
         function handleChoice(choice) {
-            switch (choice) {
-                case "Play with the Ball":
-                    if (claimedRewards.has('ball')) {
-                        message = "Ginger just watches you now — you've already played fetch with her today.";
-                    } else {
-                        message = "Ginger bats a glowing ball toward you, her eyes sparkling with excitement.";
-                        glowingBall = { x: width / 2, y: 100 };
-                        showGlowingBall = true;
-                        ballSource = 'ball';
+            if (activeInteraction === 'riddle') {
+                handleRiddleChoice(choice);
+            } else {
+                switch (choice) {
+                    case "Play with the Ball":
+                        if (claimedRewards.has('ball')) {
+                            message = "Ginger just watches you now — you've already played fetch with her today.";
+                        } else {
+                            message = "Ginger bats a glowing ball toward you, her eyes sparkling with excitement.";
+                            glowingBall = { x: width / 2, y: 100 };
+                            showGlowingBall = true;
+                            ballSource = 'ball';
+                        }
+                        break;
+                    case "Ask About the Forest":
+                        message = generateForestLore();
+                        break;
+                    case "Pet the Cat": {
+                        const petKey = `pet-${activeCatIndex}`;
+                        if (claimedRewards.has(petKey)) {
+                            message = "The cat headbutts your hand affectionately, but has nothing new to share.";
+                        } else {
+                            message = pick(flavorBanks.purrs);
+                            points += 5;
+                            claimedRewards.add(petKey);
+                        }
+                        break;
                     }
-                    break;
-                case "Ask About the Forest":
-                    message = "The Enchanted Forest is full of secrets. Bring me a golden leaf, and I might tell you more.";
-                    break;
-                case "Pet the Cat": {
-                    const petKey = `pet-${activeCatIndex}`;
-                    if (claimedRewards.has(petKey)) {
-                        message = "The cat headbutts your hand affectionately, but has nothing new to share.";
-                    } else {
-                        message = "The cat purrs loudly, leaning into your touch. \"Hmm, you know how to treat royalty! Maybe I’ll help you on your journey.\"";
-                        points += 5;
-                        claimedRewards.add(petKey);
-                    }
-                    break;
+                    case "Chase a Falling Star":
+                        if (claimedRewards.has('star')) {
+                            message = "The sky is calm now — you've already claimed your falling star.";
+                        } else {
+                            message = "A star streaks down from the heavens, glowing brighter as it falls!";
+                            glowingBall = { x: random(100, width - 100), y: random(100, 300) };
+                            showGlowingBall = true;
+                            ballSource = 'star';
+                        }
+                        break;
+                    case "Ask About the Sky Palace":
+                        message = generateSkyLore();
+                        break;
                 }
-                case "Chase a Falling Star":
-                    if (claimedRewards.has('star')) {
-                        message = "The sky is calm now — you've already claimed your falling star.";
-                    } else {
-                        message = "A star streaks down from the heavens, glowing brighter as it falls!";
-                        glowingBall = { x: random(100, width - 100), y: random(100, 300) };
-                        showGlowingBall = true;
-                        ballSource = 'star';
-                    }
-                    break;
-                case "Ask About the Sky Palace":
-                    message = "The Sky Palace floats among the clouds, home to those who dare to reach for the stars.";
-                    break;
-                case "The Moon":
-                    message = "\"Close,\" the cat purrs, \"but the moon can be seen for a whole night. Try again, seeker.\"";
-                    break;
-                case "A Star":
-                    if (claimedRewards.has('riddle')) {
-                        message = "\"You already proved your wisdom to me,\" the cat says warmly.";
-                    } else {
-                        message = "\"Yes!\" the cat's eyes gleam. \"A star shines but can never be held. The Starry Abyss opens to you!\"";
-                        points += 10;
-                        claimedRewards.add('riddle');
-                    }
-                    break;
-                case "A Flame":
-                    message = "\"A flame can be held, foolish traveler,\" the cat says with a smirk. \"Think again.\"";
-                    break;
             }
             messageTimer = 180;
             choices = []; // Clear choices after handling one
+        }
+
+        // The riddle's correct answer, and its pool of wrong answers, are
+        // chosen fresh each visit (see pickRiddle), so this checks against
+        // whichever riddle is currently active rather than a fixed string.
+        function handleRiddleChoice(choice) {
+            if (choice === currentRiddle.correct) {
+                if (claimedRewards.has('riddle')) {
+                    message = "\"You already proved your wisdom to me,\" the cat says warmly.";
+                } else {
+                    message = `"Yes!" the cat's eyes gleam. "${currentRiddle.correct} — the Starry Abyss opens to you!"`;
+                    points += 10;
+                    claimedRewards.add('riddle');
+                }
+            } else {
+                message = pick(riddleWrongFlavor);
+            }
         }
 
         function displayCoordinates() {
@@ -364,6 +433,8 @@
             glowingBall = null;
             ballSource = null;
             activeCatIndex = -1;
+            activeInteraction = null;
+            currentRiddle = null;
             claimedRewards.clear();
             document.getElementById('restart-btn').style.display = 'none';
         }

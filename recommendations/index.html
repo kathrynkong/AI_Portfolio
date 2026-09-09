@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Switch Game Recommender</title>
+    <title>Switch Game Recommender: A Content-Based Recommendation Prototype</title>
     <style>
         body {
             font-family: 'Press Start 2P', cursive, Arial, sans-serif;
@@ -63,7 +63,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Switch Game Recommender</h1>
+    <h1>Switch Game Recommender: A Content-Based Recommendation Prototype</h1>
     <div id="games"></div>
     <div id="preferences"></div>
     <button id="submit-btn" class="action-btn" onclick="displayTopGenresAndRecommendations()">Submit Ratings</button>
@@ -72,18 +72,72 @@
     <button id="more-btn" class="action-btn" onclick="loadMoreGames()" style="display:none;">Rate More Games</button>
 
     <script>
-        const genrePreferences = {};
         let allGames = [];
         const ratedGames = new Set();
         const BATCH_SIZE = 5;
+
+        // Content-based recommender: every game is represented as a one-hot
+        // feature vector over genre/player-mode/ESRB-rating tokens, and your
+        // ratings accumulate into a preference vector in that same space.
+        // Recommendations are ranked by cosine similarity between the two.
+        let vocab = null;
+        let userProfile = null;
 
         fetch('./Switchgame.json')
             .then(response => response.json())
             .then(gamesJson => {
                 allGames = gamesJson;
+                vocab = buildVocabulary(allGames);
                 loadNextBatch();
             })
             .catch(error => console.error('Error fetching JSON:', error));
+
+        function splitTokens(value) {
+            return String(value).split(/[\/,]/).map(s => s.trim()).filter(Boolean);
+        }
+
+        function buildVocabulary(games) {
+            const genres = new Set();
+            const players = new Set();
+            const ratings = new Set();
+            games.forEach(game => {
+                splitTokens(game.genre).forEach(t => genres.add(t));
+                splitTokens(game.players).forEach(t => players.add(t));
+                ratings.add(game.esrb_rating);
+            });
+            return { genres: [...genres], players: [...players], ratings: [...ratings] };
+        }
+
+        function featureVector(game, vocabulary) {
+            const genreSet = new Set(splitTokens(game.genre));
+            const playerSet = new Set(splitTokens(game.players));
+            const vec = [];
+            vocabulary.genres.forEach(g => vec.push(genreSet.has(g) ? 1 : 0));
+            vocabulary.players.forEach(p => vec.push(playerSet.has(p) ? 1 : 0));
+            vocabulary.ratings.forEach(r => vec.push(game.esrb_rating === r ? 1 : 0));
+            return vec;
+        }
+
+        function cosineSimilarity(a, b) {
+            let dot = 0, magA = 0, magB = 0;
+            for (let i = 0; i < a.length; i++) {
+                dot += a[i] * b[i];
+                magA += a[i] * a[i];
+                magB += b[i] * b[i];
+            }
+            if (magA === 0 || magB === 0) return 0;
+            return dot / (Math.sqrt(magA) * Math.sqrt(magB));
+        }
+
+        // Top genre tokens in the user's preference vector, for display.
+        function topGenrePreferences(limit) {
+            if (!userProfile) return [];
+            return vocab.genres
+                .map((genre, i) => [genre, userProfile[i]])
+                .filter(([, score]) => score > 0)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, limit || vocab.genres.length);
+        }
 
         function escapeHtml(value) {
             return String(value).replace(/[&<>"']/g, ch => ({
@@ -149,19 +203,23 @@
                 `;
 
                 gameDiv.querySelectorAll('.rating input[type="radio"]').forEach(input => {
-                    input.addEventListener('change', () => handleRating(game.genre, input.value));
+                    input.addEventListener('change', () => handleRating(game, input.value));
                 });
 
                 gamesContainer.appendChild(gameDiv);
             });
         }
 
-        // Ratings of 3+ add their value to the genre's score, so a 5 counts
-        // more than a 3 instead of every rating >=3 counting the same.
-        function handleRating(genre, ratingValue) {
+        // A rating moves the preference vector toward (5) or away from (1)
+        // this game's feature vector; 3 is neutral and leaves it untouched.
+        function handleRating(game, ratingValue) {
             const rating = Number(ratingValue);
-            if (!Number.isNaN(rating) && rating >= 3) {
-                genrePreferences[genre] = (genrePreferences[genre] || 0) + rating;
+            if (Number.isNaN(rating)) return; // "haven't played"
+            const vec = featureVector(game, vocab);
+            if (!userProfile) userProfile = new Array(vec.length).fill(0);
+            const weight = (rating - 3) / 2;
+            for (let i = 0; i < vec.length; i++) {
+                userProfile[i] += weight * vec[i];
             }
             updatePreferencesDisplay();
         }
@@ -169,54 +227,48 @@
         function updatePreferencesDisplay() {
             const preferencesContainer = document.getElementById('preferences');
             preferencesContainer.innerHTML = '<h2>Genre Preferences</h2>';
-            const sorted = Object.entries(genrePreferences).sort((a, b) => b[1] - a[1]);
-            if (sorted.length === 0) {
-                preferencesContainer.innerHTML += '<div>Rate a game 3 stars or higher to start building your genre preferences.</div>';
+            const top = topGenrePreferences(6);
+            if (top.length === 0) {
+                preferencesContainer.innerHTML += '<div>Rate a game 3 stars or higher to start building your taste profile.</div>';
                 return;
             }
-            sorted.forEach(([genre, score]) => {
-                preferencesContainer.innerHTML += `<div>${escapeHtml(genre)}: ${score} pts</div>`;
+            top.forEach(([genre, score]) => {
+                preferencesContainer.innerHTML += `<div>${escapeHtml(genre)}: ${score.toFixed(2)}</div>`;
             });
         }
 
         function displayTopGenresAndRecommendations() {
-            const sortedGenres = Object.entries(genrePreferences).sort((a, b) => b[1] - a[1]);
-            const topGenres = sortedGenres.slice(0, 3);
             const topGenresContainer = document.getElementById('top-genres');
             const recommendationsContainer = document.getElementById('recommendations');
+            const moreBtn = document.getElementById('more-btn');
 
+            const top = topGenrePreferences(3);
             topGenresContainer.innerHTML = '<h2>Top Genres Based on Your Ratings</h2>';
-            if (topGenres.length === 0) {
+            if (top.length === 0) {
                 topGenresContainer.innerHTML += '<div>Rate a few games 3 stars or higher to see your top genres.</div>';
                 recommendationsContainer.innerHTML = '';
-                document.getElementById('more-btn').style.display = 'inline-block';
+                moreBtn.style.display = 'inline-block';
                 return;
             }
-            topGenres.forEach(([genre, score]) => {
-                topGenresContainer.innerHTML += `<div>${escapeHtml(genre)}: ${score} pts</div>`;
+            top.forEach(([genre, score]) => {
+                topGenresContainer.innerHTML += `<div>${escapeHtml(genre)}: ${score.toFixed(2)}</div>`;
             });
 
-            // Fill 3 recommendations from your strongest genre first; if a
-            // genre runs out of unrated games, fall back to the next
-            // strongest genre instead of leaving the list short.
-            const recommendations = [];
-            const seen = new Set();
-            for (const [genre] of sortedGenres) {
-                if (recommendations.length >= 3) break;
-                for (const game of allGames) {
-                    if (recommendations.length >= 3) break;
-                    if (game.genre === genre && !ratedGames.has(game.title) && !seen.has(game.title)) {
-                        recommendations.push(game);
-                        seen.add(game.title);
-                    }
-                }
-            }
+            // Rank every unrated game by cosine similarity to your
+            // preference vector — a real (if classical) content-based
+            // recommendation technique, not a hardcoded genre lookup.
+            const scored = allGames
+                .filter(game => !ratedGames.has(game.title))
+                .map(game => ({ game, score: cosineSimilarity(userProfile, featureVector(game, vocab)) }))
+                .filter(entry => entry.score > 0)
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 3);
 
             recommendationsContainer.innerHTML = '<h2>Recommended Games for You</h2>';
-            if (recommendations.length === 0) {
-                recommendationsContainer.innerHTML += '<div>No recommendations available — looks like you\'ve rated everything in your favorite genres!</div>';
+            if (scored.length === 0) {
+                recommendationsContainer.innerHTML += '<div>No recommendations available — try rating a few more games.</div>';
             } else {
-                recommendations.forEach(game => {
+                scored.forEach(({ game, score }) => {
                     recommendationsContainer.innerHTML += `
                         <div class="game-container">
                             <div class="game-title">${escapeHtml(game.title)}</div>
@@ -227,12 +279,13 @@
                             <div>Number of Players: ${escapeHtml(game.players)}</div>
                             <div>ESRB Rating: ${escapeHtml(game.esrb_rating)}</div>
                             <div>Supported Languages: ${escapeHtml(game.supported_languages.join(', '))}</div>
+                            <div>Match: ${(score * 100).toFixed(0)}%</div>
                         </div>
                     `;
                 });
             }
 
-            document.getElementById('more-btn').style.display = 'inline-block';
+            moreBtn.style.display = 'inline-block';
         }
     </script>
 </body>
