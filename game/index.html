@@ -156,7 +156,11 @@
                     switch (i) {
                         case 0:
                             message = "Bring me the shimmer of the cosmos, and I shall grant you the Sky Palace's secret.";
-                            choices = []; // Clear choices if any
+                            choices = [
+                                "Chase a Falling Star",
+                                "Ask About the Sky Palace",
+                                "Pet the Cat"
+                            ];
                             break;
                         case 1:
                             message = "Chase the ball, and the Enchanted Forest will open its heart to you.";
@@ -168,7 +172,11 @@
                             break;
                         case 2:
                             message = "The stars whisper their secrets to me. Prove you understand their song, and the Starry Abyss shall be yours.";
-                            choices = []; // Clear choices if any
+                            choices = [
+                                "The Moon",
+                                "A Star",
+                                "A Flame"
+                            ];
                             break;
                     }
                     messageTimer = 180; // Display message for 3 seconds
@@ -214,6 +222,24 @@
                 case "Pet the Cat":
                     message = "The cat purrs loudly, leaning into your touch. \"Hmm, you know how to treat royalty! Maybe I’ll help you on your journey.\"";
                     points += 5;
+                    break;
+                case "Chase a Falling Star":
+                    message = "A star streaks down from the heavens, glowing brighter as it falls!";
+                    glowingBall = { x: random(100, width - 100), y: random(100, 300) };
+                    showGlowingBall = true;
+                    break;
+                case "Ask About the Sky Palace":
+                    message = "The Sky Palace floats among the clouds, home to those who dare to reach for the stars.";
+                    break;
+                case "The Moon":
+                    message = "\"Close,\" the cat purrs, \"but the moon can be seen for a whole night. Try again, seeker.\"";
+                    break;
+                case "A Star":
+                    message = "\"Yes!\" the cat's eyes gleam. \"A star shines but can never be held. The Starry Abyss opens to you!\"";
+                    points += 10;
+                    break;
+                case "A Flame":
+                    message = "\"A flame can be held, foolish traveler,\" the cat says with a smirk. \"Think again.\"";
                     break;
             }
             messageTimer = 180;
